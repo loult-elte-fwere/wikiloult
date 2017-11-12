@@ -1,0 +1,63 @@
+<!doctype html>
+
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <meta name="description" content="Le wiki du Loult" />
+    {% block head %}
+    <title>Wiki Loult - {% block title %} Encyclopédie Loultiste{% endblock %}</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}" />
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+    {% endblock %}
+  </head>
+  <body>
+    <div id="container">
+      <div id="side-nav">
+        <div id="logo">
+          <a href="#"><img src="{{ url_for('static', filename='images/logo_wiki.svg') }}" alt="loult logo" />
+          </a>
+        </div>
+        <div id="side-menu">
+          <h2>Wiki Loult</h2>
+          <ul>
+            <li><a href="#">Accueil</a></li>
+            <li><a href="#">Charte</a></li>
+            <li><a href="#">F.A.Q</a></li>
+            <li><a href="#">Doume mou</a></li>
+          </ul>
+          <h2>Contenu</h2>
+          <ul>
+            <li><a href="#">Article au Hasard</a></li>
+            <li><a href="#">Histoire du Loult</a></li>
+            <li><a href="#">Dico du Loult</a></li>
+          </ul>
+          <h2>Edition</h2>
+          <ul>
+            <li><a href="#">Dernières modifications</a></li>
+            <li><a href="#">Markdown</a></li>
+          </ul>
+          </div>
+      </div>
+      <div id="main-nav">
+      <header>
+        <div id="login">
+          <ul>
+            <li><a href="#">Connection</a></li>
+            <li><a href="#">Inscription</a></li>
+          </ul>
+        </div>
+      </header>
+    <main>
+        {% block body %}{% endblock %}
+      </main>
+      <footer>
+        <ul>
+          <li>Loult</li>
+          <li>Github</li>
+          <li>Theme</li>
+        </ul>
+      </footer>
+      </div>
+    </div>
+  </body>
+</html>
