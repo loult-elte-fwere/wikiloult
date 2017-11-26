@@ -15,13 +15,13 @@ def login():
 
 
 @app.route("/page/<page_name>")
-def page():
+def page(page_name):
     """Display a wiki page"""
     return render_template("index.html")
 
 
 @app.route("/page/<page_name>/edit")
-def page_edit():
+def page_edit(page_name):
     """Page edition form"""
     return render_template("index.html")
 
@@ -33,7 +33,7 @@ def page_create():
 
 
 @app.route("/user/<cookie>")
-def user_page():
+def user_page(cookie):
     """User's personal page"""
     return render_template("index.html")
 
