@@ -4,6 +4,41 @@ app = Flask(__name__)
 
 
 @app.route("/")
-def hello():
+def home():
     return render_template("index.html")
 
+
+@app.route("/login")
+def login():
+    """User login page"""
+    return render_template("index.html")
+
+
+@app.route("/page/<page_name>")
+def page():
+    """Display a wiki page"""
+    return render_template("index.html")
+
+
+@app.route("/page/<page_name>/edit")
+def page_edit():
+    """Page edition form"""
+    return render_template("index.html")
+
+
+@app.route("/page/create")
+def page_create():
+    """Page creation form (almost the same as the page edition form"""
+    return render_template("index.html")
+
+
+@app.route("/user/<cookie>")
+def user_page():
+    """User's personal page"""
+    return render_template("index.html")
+
+
+@app.route("/search")
+def searc_page():
+    """Search for a wiki page"""
+    return render_template("index.html")

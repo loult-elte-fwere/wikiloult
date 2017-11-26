@@ -1,5 +1,5 @@
 from pymongo import MongoClient
-from config import DB_ADDRESS
+from config import DB_ADDRESS, USERS_COLLECTION_NAME, PAGES_COLLECTION_NAME
 
 
 class BaseConnector:
@@ -15,11 +15,11 @@ class UsersConnector(BaseConnector):
 
     def __init__(self):
         super().__init__()
-        self.users = self.db["users"]
+        self.users = self.db[USERS_COLLECTION_NAME]
 
 
 class WikiPagesConnector(BaseConnector):
 
     def __init__(self):
         super().__init__()
-        self.pages = self.db["pages"]
+        self.pages = self.db[PAGES_COLLECTION_NAME]
