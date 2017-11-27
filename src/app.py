@@ -8,7 +8,7 @@ def home():
     return render_template("index.html")
 
 
-@app.route("/login")
+@app.route("/login", methods=['GET', 'POST'])
 def login():
     """User login page"""
     return render_template("index.html")
@@ -20,13 +20,13 @@ def page(page_name):
     return render_template("index.html")
 
 
-@app.route("/page/<page_name>/edit")
+@app.route("/page/<page_name>/edit", methods=['GET', 'POST'])
 def page_edit(page_name):
     """Page edition form"""
     return render_template("index.html")
 
 
-@app.route("/page/create")
+@app.route("/page/create", methods=['GET', 'POST'])
 def page_create():
     """Page creation form (almost the same as the page edition form"""
     return render_template("index.html")
