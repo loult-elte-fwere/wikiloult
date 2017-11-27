@@ -108,3 +108,6 @@ ENV/
 
 #pycharm
 .idea/
+
+#generated soundfiles
+src/static/sound/
