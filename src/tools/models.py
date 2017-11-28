@@ -17,8 +17,11 @@ class UsersConnector(BaseConnector):
         super().__init__()
         self.users = self.db[USERS_COLLECTION_NAME]
 
+    def user_exists(self, user_cookie : str) -> bool:
+        pass
+
     def register_user(self, user_cookie: str):
-        """Registers user cookie as a new user. Sets authorization to pending"""
+        """Registers user cookie as a new user. Sets authorization to pending."""
         pass
 
     def authorize_user(self, user_cookie: str):
@@ -42,8 +45,11 @@ class WikiPagesConnector(BaseConnector):
     def create_page(self, page_name : str, markdown_content: str, page_title: str, editor_cookie: str):
         pass
 
-    def edit_page(self, page_name: str, markdown_content: str):
+    def edit_page(self, page_name: str, markdown_content: str, page_title: str, editor_cookie : str):
         pass
 
     def search_page(self, search_query: str):
+        pass
+
+    def get_page_data(self, page_name : str):
         pass

@@ -1,5 +1,8 @@
 {% extends "base.html" %}
 
+{# Si la variable "message" est définie, faut pas afficher le form, et afficher un message,
+cf : https://stackoverflow.com/questions/3842690/in-jinja2-how-do-you-test-if-a-variable-is-undefined #}
+
 {% block body %}
 <p style="text-align:center">Ici va le contenu principal</p>
 {% endblock %}

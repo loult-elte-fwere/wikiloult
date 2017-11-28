@@ -45,3 +45,5 @@ class User:
         cookie_hash = md5((cookie + SALT).encode('utf8')).digest()
         self.voice_params = VoiceParameters.from_cookie_hash(cookie_hash)
         self.poke_params = PokeParameters.from_cookie_hash(cookie_hash)
+        self.cookie = cookie
+        self.user_id = cookie_hash.hex()[-16:]
