@@ -1,8 +1,18 @@
 {% extends "base.html" %}
 
-{# Si la variable "message" est définie, faut pas afficher le form, et afficher un message,
-cf : https://stackoverflow.com/questions/3842690/in-jinja2-how-do-you-test-if-a-variable-is-undefined #}
-
 {% block body %}
-<p style="text-align:center">Ici va le contenu principal</p>
+{% if message is defined %}
+    <div class="alert alert-info">
+    {{ message }}
+    </div>
+{% else %}
+    <form method="post">
+      <div class="form-group">
+        <label for="cookie">Cookie</label>
+        <input type="password" class="form-control" id="cookie">
+      </div>
+      <button type="submit" class="btn btn-default">Valider</button>
+    </form>
+{% endif %}
+
 {% endblock %}

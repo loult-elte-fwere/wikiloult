@@ -6,6 +6,8 @@ from tools.users import User
 
 app = Flask(__name__)
 
+#app.config.from_envvar('DEV_SETTINGS', silent=True)
+
 def autologin(function):
     """Decorator that tries to log in automatically is the cookie is already set
     by a past login"""
@@ -138,3 +140,9 @@ def searc_page():
     """Search for a wiki page"""
     return render_template("index.html")
 
+
+def main():
+    app.run()
+
+if(__name__ == "__main__"):
+    main()

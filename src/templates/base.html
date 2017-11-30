@@ -17,7 +17,7 @@
     {% endblock %}
   </head>
   <body>
-    <div id="container">
+    <div id="container" class="container">
       <div id="side-nav">
         <div id="logo">
           <a href="#"><img src="{{ url_for('static', filename='images/logo_wiki.svg') }}" alt="loult logo" />
@@ -48,12 +48,11 @@
       <header>
         <div id="login">
           <ul>
-            <li><a href="#">Connection</a></li>
-            <li><a href="#">Inscription</a></li>
+            <li><a href="{{ url_for('login') }}">Connection</a></li>
           </ul>
         </div>
       </header>
-    <main>
+      <main class="container">
         {% block body %}{% endblock %}
       </main>
       <footer>
