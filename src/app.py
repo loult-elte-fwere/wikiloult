@@ -5,8 +5,9 @@ from tools.models import UsersConnector, WikiPagesConnector
 from tools.users import User
 
 app = Flask(__name__)
-
-#app.config.from_envvar('DEV_SETTINGS', silent=True)
+app.config['TEMPLATES_AUTO_RELOAD'] = True
+app.debug = True
+# app.config.from_envvar('DEV_SETTINGS', silent=True)
 
 def autologin(function):
     """Decorator that tries to log in automatically is the cookie is already set

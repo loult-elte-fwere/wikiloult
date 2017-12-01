@@ -2,7 +2,7 @@
 
 <html>
   <head>
-     <!-- Required meta tags -->
+    <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
@@ -17,56 +17,60 @@
     {% endblock %}
   </head>
   <body>
-    <div id="container" class="container">
-      <div id="side-nav">
-        <div id="logo">
-          <a href="#"><img src="{{ url_for('static', filename='images/logo_wiki.svg') }}" alt="loult logo" />
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-sm-4">
+          <a>
+            <img src="{{ url_for('static', filename='images/logo_wiki.svg') }}" alt="loult logo" />
           </a>
         </div>
-        <div id="side-menu">
-          <h2>Wiki Loult</h2>
-          <ul>
-            <li><a href="#">Accueil</a></li>
-            <li><a href="#">Charte</a></li>
-            <li><a href="#">F.A.Q</a></li>
-            <li><a href="#">Doume mou</a></li>
-          </ul>
-          <h2>Contenu</h2>
-          <ul>
-            <li><a href="#">Article au Hasard</a></li>
-            <li><a href="#">Histoire du Loult</a></li>
-            <li><a href="#">Dico du Loult</a></li>
-          </ul>
-          <h2>Edition</h2>
-          <ul>
-            <li><a href="#">Dernières modifications</a></li>
-            <li><a href="#">Markdown</a></li>
-          </ul>
-          </div>
-      </div>
-      <div id="main-nav">
-      <header>
-        <div id="login">
-            <div><a href="{{ url_for('login') }}">Connection</a></div>
+        <div class="col-sm-8 right">
+          <nav class="navbar navbar-inverse">
+            <div class="container-fluid">
+              <div class="navbar-header"></div> 
+              <ul class="nav navbar-nav navbar-right">
+                <li><a class="btn btn-info center" href="{{ url_for('login') }}">
+                    <span class="glyphicon glyphicon-log-in"></span>Connexion</a>
+                </li>
+              </ul>
+            </div>
+          </nav>
         </div>
-      </header>
-      <main class="container">
-        {% block body %}{% endblock %}
-      </main>
-      <footer>
-        <ul>
-          <li>Loult</li>
-          <li>Github</li>
-          <li>Theme</li>
-        </ul>
-      </footer>
       </div>
-    </div>
-    <!-- Optional JavaScript -->
-    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
-  </body>
+      <div class="row">
+        <div class="col-sm-2">
+          <div>
+            <h3>Wiki Loult</h3>
+            <ul class="list-group">
+              <li class="list-group-item"><a href="#">Accueil</a></li>
+              <li class="list-group-item"><a href="#">Charte</a></li>
+              <li class="list-group-item"><a href="#">F.A.Q</a></li>
+              <li class="list-group-item"><a href="#">Doume mou</a></li>
+            </ul>
+            <h3>Contenu</h3>
+            <ul class="list-group">
+              <li class="list-group-item"><a href="#">Article au Hasard</a></li>
+              <li class="list-group-item"><a href="#">Histoire du Loult</a></li>
+              <li class="list-group-item"><a href="#">Dico du Loult</a></li>
+            </ul>
+            <h3>Edition</h3>
+            <ul class="list-group">
+              <li class="list-group-item"><a href="#">Dernières modifications</a></li>
+              <li class="list-group-item"><a href="#">Markdown</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="col-sm-10">
+          <main>
+            {% block body %}{% endblock %}
+          </main>
+          </div>
+        </div>
+      </div>
+      <!-- Optional JavaScript -->
+      <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+      <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js" integrity="sha384-vFJXuSJphROIrBnz7yo7oB41mKfc8JzQZiCq4NCceLEaO4IHwicKwpJf9c9IpFgh" crossorigin="anonymous"></script>
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
   </body>
 </html>

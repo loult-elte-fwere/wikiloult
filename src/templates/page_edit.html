@@ -1,5 +1,11 @@
 {% extends "base.html" %}
 
+{% block title %}{{ page_title }}{% endblock %} 
+
 {% block body %}
-<p style="text-align:center">Ici va le contenu principal</p>
+<h2>{{ page_titre }}</h2>
+<div class="container">
+  {{ markdown_content }}
+</div>
+
 {% endblock %}
