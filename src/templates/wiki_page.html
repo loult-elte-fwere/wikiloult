@@ -1,5 +1,16 @@
 {% extends "base.html" %}
 
+{% block headernav %}
+<ul class="list-inline">
+  <li class="list-inline-item"><a class="btn btn-primary center navbar-btn" href="{{ url_for('page_create') }}">Nouvelle page</a></li>
+  <li class="list-inline-item"><a class="btn btn-info center navbar-btn" href="{{ url_for('page_edit', page_name=page_name ) }}">Editer</a></li>
+  <li class="list-inline-item"><a class="btn btn-info center navbar-btn"  href="{{ url_for('login') }}">Historique</a></li>
+</ul>
+{% endblock %}
+
 {% block body %}
-<p style="text-align:center">Ici va le contenu principal</p>
+<div class="container">
+  <h2 class="text-center"> {{ page_name|title }} </h2>
+    {{ page_data }}
+</div>
 {% endblock %}
