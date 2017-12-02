@@ -1,11 +1,3 @@
-{% extends "base.html" %}
+{% extends "page_create.html" %}
 
 {% block title %}{{ page_title }}{% endblock %} 
-
-{% block body %}
-<h2>{{ page_titre }}</h2>
-<div class="container">
-  {{ markdown_content }}
-</div>
-
-{% endblock %}

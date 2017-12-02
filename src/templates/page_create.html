@@ -1,5 +1,26 @@
 {% extends "base.html" %}
 
 {% block body %}
-<p style="text-align:center">Ici va le contenu principal</p>
+{% if message is defined %}
+<div class="alert alert-warning">
+  {{ message }}
+</div>
+{% endif %}
+
+<div class="container">
+  <h2>Nouvel article</h2>
+  <form method="post" action="{{ url_for('page_create') }}">
+    <div class="form-group">
+      <label for="title" class="control-label">Titre</label>
+      <input type="text" class="form-control" id="title" name="title"
+             value="{{ page_title if page_title != None}}">
+    </div>
+    <div class="form-group">
+      <label for="content" class="control-label">Contenu</label>
+      <textarea class="form-control" id="content" name="content">
+        {{ page_content if page_content != None }}
+      </textarea>
+    </div>
+    <button type="submit" class="btn btn-submit">Valider</button>
+</div>
 {% endblock %}

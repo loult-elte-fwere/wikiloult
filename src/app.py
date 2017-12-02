@@ -1,4 +1,4 @@
-from flask import Flask, render_template, session, redirect, url_for, request, make_response, jsonify
+from flask import Flask, render_template, session, redirect, url_for, request, make_response
 import re
 
 from tools.models import UsersConnector, WikiPagesConnector

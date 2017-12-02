@@ -4,13 +4,19 @@
 <ul class="list-inline">
   <li class="list-inline-item"><a  href="{{ url_for('page_create') }}">Nouvelle page</a></li>
   <li class="list-inline-item"><a  href="{{ url_for('page_edit', page_name=page_name ) }}">Editer</a></li>
-  <li class="list-inline-item"><a   href="{{ url_for('login') }}">Historique</a></li>
+  <li class="list-inline-item"><a  href="{{ url_for('login') }}">Historique</a></li>
 </ul>
 {% endblock %}
 
 {% block body %}
 <div class="container">
   <h2 class="text-center"> {{ page_name|title }} </h2>
-    {{ page_data }}
+  {% if page_data != None %}
+  {{ page_data }}
+  {% else %}
+  <div class="alert alert-info">
+    Aucun contenu rédigé pour cette page à ce jour.
+  </div>
+  {% endif %}
 </div>
 {% endblock %}
