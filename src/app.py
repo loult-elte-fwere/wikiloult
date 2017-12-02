@@ -1,13 +1,16 @@
-from flask import Flask, render_template, session, redirect, url_for, request, make_response
+from flask import Flask, render_template, session, redirect, url_for, request, make_response, jsonify
 import re
 
 from tools.models import UsersConnector, WikiPagesConnector
 from tools.users import User
 
+from config import SECRET_KEY
+
 app = Flask(__name__)
-app.config['TEMPLATES_AUTO_RELOAD'] = True
-app.debug = True
-# app.config.from_envvar('DEV_SETTINGS', silent=True)
+
+app.config['SECRET_KEY'] = SECRET_KEY
+
+app.config.from_envvar('DEV_SETTINGS', silent=True)
 
 def autologin(function):
     """Decorator that tries to log in automatically is the cookie is already set
@@ -24,7 +27,7 @@ def home():
 def login():
     """User login page"""
     if "user" in session:
-        redirect(url_for("user_page", user_id=session["user"].user_id))
+        redirect(url_for("user_page", user_id=session["user"]['user_id']))
 
     if request.method == "GET":
         return render_template("login.html")
@@ -40,7 +43,8 @@ def login():
         else:
             message = "Connectèw."
 
-        session["user"] = User(user_cookie)
+        # TypeError: <tools.users.User object at ... > is not JSON serializable
+        session["user"] = User(user_cookie).serialize()
         resp = make_response(render_template("login.html", message=message))
         resp.set_cookie("id", user_cookie)
         return resp
@@ -58,7 +62,9 @@ def logout():
 def page(page_name):
     """Display a wiki page"""
     page_cnctr = WikiPagesConnector()
-    return render_template("wiki_page.html", page_data=page_cnctr.get_page_data(page_name))
+    return render_template("wiki_page.html",
+                           page_data=page_cnctr.get_page_data(page_name),
+                           page_name=page_name)
 
 
 @app.route("/page/<page_name>/edit", methods=['GET', 'POST'])
@@ -69,7 +75,7 @@ def page_edit(page_name):
         return render_template("error.html", message="Vous devez être connectés pour éditer la page")
 
     user_cnctr = UsersConnector()
-    if not user_cnctr.is_allowed(session["user"].cookie):
+    if not user_cnctr.is_allowed(session["user"]['cookie']):
         return render_template("error.html", message="Vous n'êtes pas encore autorisés à éditer des pages")
 
     page_cnctr = WikiPagesConnector()
@@ -88,7 +94,7 @@ def page_edit(page_name):
                                    page_title=title,
                                    message="Le titre ni le contenu ne doivent être vides.")
 
-        page_cnctr.edit_page(page_name, markdown_content, title, session["user"].cookie)
+        page_cnctr.edit_page(page_name, markdown_content, title, session["user"]['cookie'])
         redirect(url_for("page", page_name=page_name))
 
 
@@ -100,7 +106,7 @@ def page_create():
         return render_template("error.html", message="Vous devez être connectés pour éditer la page")
 
     user_cnctr = UsersConnector()
-    if not user_cnctr.is_allowed(session["user"].cookie):
+    if not user_cnctr.is_allowed(session["user"]['cookie']):
         return render_template("error.html", message="Vous n'êtes pas encore autorisés à éditer des pages")
 
     page_cnctr = WikiPagesConnector()
@@ -125,7 +131,7 @@ def page_create():
                                    page_name=page_name,
                                    message=error_message)
 
-        page_cnctr.create_page(page_name.lower(), markdown_content, title, session["user"].cookie)
+        page_cnctr.create_page(page_name.lower(), markdown_content, title, session["user"]['cookie'])
         redirect(url_for("page", page_name=page_name))
     return render_template("index.html")
 
@@ -137,7 +143,7 @@ def user_page(user_id):
 
 
 @app.route("/search")
-def searc_page():
+def search_page():
     """Search for a wiki page"""
     return render_template("index.html")
 

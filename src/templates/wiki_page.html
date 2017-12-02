@@ -2,9 +2,9 @@
 
 {% block headernav %}
 <ul class="list-inline">
-  <li class="list-inline-item"><a class="btn btn-primary center navbar-btn" href="{{ url_for('page_create') }}">Nouvelle page</a></li>
-  <li class="list-inline-item"><a class="btn btn-info center navbar-btn" href="{{ url_for('page_edit', page_name=page_name ) }}">Editer</a></li>
-  <li class="list-inline-item"><a class="btn btn-info center navbar-btn"  href="{{ url_for('login') }}">Historique</a></li>
+  <li class="list-inline-item"><a  href="{{ url_for('page_create') }}">Nouvelle page</a></li>
+  <li class="list-inline-item"><a  href="{{ url_for('page_edit', page_name=page_name ) }}">Editer</a></li>
+  <li class="list-inline-item"><a   href="{{ url_for('login') }}">Historique</a></li>
 </ul>
 {% endblock %}
 

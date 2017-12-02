@@ -3,6 +3,7 @@ from .data import pokemons
 from colorsys import hsv_to_rgb
 from hashlib import md5
 from salt import SALT
+from struct import pack
 
 
 with open(path.join(path.dirname(path.realpath(__file__)), "data/adjectifs.txt")) as adj_file:
@@ -47,3 +48,9 @@ class User:
         self.poke_params = PokeParameters.from_cookie_hash(cookie_hash)
         self.cookie = cookie
         self.user_id = cookie_hash.hex()[-16:]
+
+    def serialize(self):
+        return {
+            'cookie' : self.cookie,
+            'user_id' : self.user_id
+        }
