@@ -48,8 +48,11 @@ class WikiPagesConnector(BaseConnector):
     def edit_page(self, page_name: str, markdown_content: str, page_title: str, editor_cookie : str):
         pass
 
-    def search_page(self, search_query: str):
+    def search_pages(self, search_query: str):
         pass
 
     def get_page_data(self, page_name : str):
+        pass
+
+    def get_random_page(self):
         pass

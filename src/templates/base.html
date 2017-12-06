@@ -52,20 +52,20 @@
               </form>
             <h3>Wiki Loult</h3>
             <ul class="list-group">
-              <li class="list-group-item"><a href="#">Accueil</a></li>
-              <li class="list-group-item"><a href="#">Charte</a></li>
-              <li class="list-group-item"><a href="#">F.A.Q</a></li>
+              <li class="list-group-item"><a href="{{ url_for('home') }}">Accueil</a></li>
+              <li class="list-group-item"><a href="{{ url_for('rules') }}">Charte</a></li>
+              <li class="list-group-item"><a href="{{ url_for('faq') }}">F.A.Q</a></li>
               <li class="list-group-item"><a href="#">Doume mou</a></li>
             </ul>
             <h3>Contenu</h3>
             <ul class="list-group">
-              <li class="list-group-item"><a href="#">Article au Hasard</a></li>
-              <li class="list-group-item"><a href="#">Histoire du Loult</a></li>
-              <li class="list-group-item"><a href="#">Dico du Loult</a></li>
+              <li class="list-group-item"><a href="{{ url_for('random_page') }}">Article au Hasard</a></li>
+              <li class="list-group-item"><a href="{{ url_for('history') }}">Histoire du Loult</a></li>
+              <li class="list-group-item"><a href="http://underfoule.xyz/loult/dico-louspeak.html">Dico du Loult</a></li>
             </ul>
             <h3>Edition</h3>
             <ul class="list-group">
-              <li class="list-group-item"><a href="#">Dernières modifications</a></li>
+              <li class="list-group-item"><a href="{{ url_for('last_edits') }}">Dernières modifications</a></li>
               <li class="list-group-item"><a href="#">Markdown</a></li>
             </ul>
           </div>

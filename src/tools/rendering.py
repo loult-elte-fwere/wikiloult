@@ -1,6 +1,6 @@
 import re
 from mistune import Renderer, InlineLexer, Markdown
-
+import voxpopuli
 
 class WikiLinkRenderer(Renderer):
     def wiki_link(self, alt, link):
@@ -39,3 +39,8 @@ class WikiPageRenderer:
 
     def render(self, page_string : str):
         return self.renderer(page_string)
+
+
+def audio_render(text, render_path):
+    voice = voxpopuli.Voice(lang="fr", voice_id=1, pitch=60, speed=110)
+    voice.to_audio(text, filename=render_path)
