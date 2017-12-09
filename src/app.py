@@ -1,4 +1,5 @@
 from flask import Flask, render_template, session, redirect, url_for, request, make_response
+from functools import wraps
 import re
 
 from tools.models import UsersConnector, WikiPagesConnector
@@ -15,23 +16,25 @@ app.config.from_envvar('DEV_SETTINGS', silent=True)
 
 
 def autologin(function):
-    """Decorator that tries to log in automatically is the cookie is already set
-    by a past login, by setting the session"""
-    cookie = request.cookie.get("id", None)
-    if cookie is not None:
-        session["user"] = User(user_cookie).serialize()
+    @wraps(function)
+    def with_login():
+        """Decorator that tries to log in automatically is the cookie is already
+        set by a past login, by setting the session"""
+        cookie = request.cookies.get("id", None)
+        if cookie is not None:
+            session["user"] = User(cookie).serialize()
 
     return function
 
 
-@autologin
 @app.route("/")
+@autologin
 def home():
     return render_template("index.html")
 
 
-@autologin
 @app.route("/login", methods=['GET', 'POST'])
+@autologin
 def login():
     """User login page"""
     if "user" in session:
@@ -58,8 +61,8 @@ def login():
         return resp
 
 
-@autologin
 @app.route("/logout")
+@autologin
 def logout():
     """Logout of the website : destroy session and delete the cookie"""
     session.pop("user", None)
@@ -67,8 +70,9 @@ def logout():
     resp.set_cookie('id', '', expires=0) # destroy the cookie by making it expire immediately
     return resp
 
-@autologin
+
 @app.route("/page/<page_name>")
+@autologin
 def page(page_name):
     """Display a wiki page"""
     page_cnctr = WikiPagesConnector()
@@ -77,8 +81,8 @@ def page(page_name):
                            page_name=page_name)
 
 
-@autologin
 @app.route("/page/<page_name>/edit", methods=['GET', 'POST'])
+@autologin
 def page_edit(page_name):
     """Page edition form"""
     # TODO : faire une fonction preview aussi
@@ -109,8 +113,8 @@ def page_edit(page_name):
         redirect(url_for("page", page_name=page_name))
 
 
-@autologin
 @app.route("/page/create", methods=['GET', 'POST'])
+@autologin
 def page_create():
     """Page creation form (almost the same as the page edition form"""
 
@@ -148,15 +152,15 @@ def page_create():
     return render_template("index.html")
 
 
-@autologin
 @app.route("/user/<user_id>")
+@autologin
 def user_page(user_id):
     """User's personal page"""
     return render_template("index.html")
 
 
-@autologin
 @app.route("/search")
+@autologin
 def search_page():
     """Search for a wiki page"""
     search_query = request.args.get('query', '')
@@ -164,16 +168,16 @@ def search_page():
     return render_template("page_search.html", results_list=page_cnctr.search_pages(search_query))
 
 
-@autologin
 @app.route("/random")
+@autologin
 def random_page():
     """Search for a wiki page"""
     page_cnctr = WikiPagesConnector()
     redirect(url_for("page", page_name=page_cnctr.get_random_page()))
 
 
-@autologin
 @app.route("/last_edits")
+@autologin
 def last_edits():
     """Search for a wiki page"""
     return
@@ -182,22 +186,22 @@ def last_edits():
 
 #### routes for static pages
 
-@autologin
 @app.route("/history")
+@autologin
 def history():
     """Search for a wiki page"""
     return render_template("history.html")
 
 
-@autologin
 @app.route("/faq")
+@autologin
 def faq():
     """Search for a wiki page"""
     return render_template("faq.html")
 
 
-@autologin
 @app.route("/rules")
+@autologin
 def rules():
     """Search for a wiki page"""
     return render_template("rules.html")
