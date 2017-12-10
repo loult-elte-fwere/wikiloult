@@ -58,22 +58,22 @@ class WikiPagesConnector(BaseConnector):
         super().__init__()
         self.pages = self.db[PAGES_COLLECTION_NAME]
 
-    def create_page(self, page_name : str, markdown_content: str, page_title: str, editor_cookie: str):
+    def create_page(self, page_name : str, markdown_content: str, page_title: str, editor_userid: str):
         markdown_renderer = WikiPageRenderer()
         page_render = markdown_renderer.render(markdown_content)
         page_data = {"_id": page_name,
                      "title": page_title,
                      "html_content": page_render,
-                     "history": [{"editor": editor_cookie,
+                     "history": [{"editor": editor_userid,
                                   "markdown": markdown_content,
                                   "edition_time": datetime.datetime.utcnow()}],
                      "creation_date": datetime.datetime.utcnow()}
         self.pages.insert_one(page_data)
 
-    def edit_page(self, page_name: str, markdown_content: str, page_title: str, editor_cookie : str):
+    def edit_page(self, page_name: str, markdown_content: str, page_title: str, editor_userid : str):
         markdown_renderer = WikiPageRenderer()
         new_render = markdown_renderer.render(markdown_content)
-        history_entry = {"editor": editor_cookie,
+        history_entry = {"editor": editor_userid,
                          "markdown": markdown_content,
                          "edition_time": datetime.datetime.utcnow()}
         self.pages.update_one({"_id": page_name},
@@ -93,8 +93,8 @@ class WikiPagesConnector(BaseConnector):
         return page_data
 
     def get_random_page(self):
-        result = self.pages.aggregate({"$sample": {"size": 1}})
-        return result[0]["_id"]
+        result = self.pages.aggregate([{"$sample": {"size": 1}}])
+        return next(result)["_id"]
 
     def get_last_edited(self, number : int):
         return  self.pages.aggregate([{"$unwind": "$history"},

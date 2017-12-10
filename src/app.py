@@ -64,8 +64,8 @@ def login():
 
         if not user_cnctr.user_exists(user_cookie):
             user_cnctr.register_user(user_cookie)
-            message = """"Votre compte utilisateur a été créé. 
-            Un administrateur doit le valider pour que vous puissiez aussi éditer des pages"""
+            message = """Votre compte utilisateur a été créé.
+            Un administrateur doit le valider pour que vous puissiez aussi éditer des pages."""
         else:
             message = "Connectèw."
 
@@ -126,7 +126,7 @@ def page_edit(page_name):
                                    page_title=title,
                                    message="Le titre ni le contenu ne doivent être vides.")
 
-        page_cnctr.edit_page(page_name, markdown_content, title, session["user"]['cookie'])
+        page_cnctr.edit_page(page_name, markdown_content, title, session["user"]['user_id'])
         user_cnctr.add_modification(session["user"]['cookie'], page_name)
         return redirect(url_for("page", page_name=page_name))
 
@@ -163,7 +163,7 @@ def page_create():
                                    page_name=page_name,
                                    message=error_message)
 
-        page_cnctr.create_page(page_name.lower(), markdown_content, title, session["user"]['cookie'])
+        page_cnctr.create_page(page_name.lower(), markdown_content, title, session["user"]['user_id'])
         return redirect(url_for("page", page_name=page_name))
     return render_template("index.html")
 
