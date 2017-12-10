@@ -42,7 +42,7 @@ def home():
 def login():
     """User login page"""
     if "user" in session:
-        redirect(url_for("user_page", user_id=session["user"]['user_id']))
+        return redirect(url_for("user_page", user_id=session["user"]['user_id']))
 
     if request.method == "GET":
         return render_template("login.html")
@@ -118,7 +118,7 @@ def page_edit(page_name):
 
         page_cnctr.edit_page(page_name, markdown_content, title, session["user"]['cookie'])
         user_cnctr.add_modification(session["user"]['cookie'], page_name)
-        redirect(url_for("page", page_name=page_name))
+        return redirect(url_for("page", page_name=page_name))
 
 
 @app.route("/page/create", methods=['GET', 'POST'])
@@ -156,7 +156,7 @@ def page_create():
                                    message=error_message)
 
         page_cnctr.create_page(page_name.lower(), markdown_content, title, session["user"]['cookie'])
-        redirect(url_for("page", page_name=page_name))
+        return redirect(url_for("page", page_name=page_name))
     return render_template("index.html")
 
 
@@ -186,7 +186,7 @@ def search_page():
 def random_page():
     """Search for a wiki page"""
     page_cnctr = WikiPagesConnector()
-    redirect(url_for("page", page_name=page_cnctr.get_random_page()))
+    return redirect(url_for("page", page_name=page_cnctr.get_random_page()))
 
 
 @app.route("/last_edits")
