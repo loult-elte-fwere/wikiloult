@@ -117,6 +117,7 @@ def page_edit(page_name):
                                    message="Le titre ni le contenu ne doivent être vides.")
 
         page_cnctr.edit_page(page_name, markdown_content, title, session["user"]['cookie'])
+        user_cnctr.add_modification(session["user"]['cookie'], page_name)
         redirect(url_for("page", page_name=page_name))
 
 
@@ -191,8 +192,9 @@ def random_page():
 @app.route("/last_edits")
 @autologin
 def last_edits():
-    """Search for a wiki page"""
-    return
+    """Display pages that where last edited"""
+    page_cnctr = WikiPagesConnector()
+    return render_template("last_edited.html", pages_list=page_cnctr.get_last_edited(10))
 
 
 

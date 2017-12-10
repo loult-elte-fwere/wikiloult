@@ -38,6 +38,11 @@ class UsersConnector(BaseConnector):
                          "personal_text_render": None}
         self.users.insert_one(new_user_data)
 
+    def add_modification(self, user_cookie : str, page_name : str):
+        self.users.update_one({"_id": user_cookie},
+                              {"$push": {"modifications" : {"page": page_name,
+                                                            "date": datetime.datetime.utcnow()}}})
+
     def get_user_data(self, user_id: str):
         return self.users.find_one({"short_id": user_id})
 
@@ -59,9 +64,9 @@ class WikiPagesConnector(BaseConnector):
         page_data = {"_id": page_name,
                      "title": page_title,
                      "html_content": page_render,
-                     "history" : [{"editor": editor_cookie,
-                                   "markdown": markdown_content,
-                                   "edition_time": datetime.datetime.utcnow()}],
+                     "history": [{"editor": editor_cookie,
+                                  "markdown": markdown_content,
+                                  "edition_time": datetime.datetime.utcnow()}],
                      "creation_date": datetime.datetime.utcnow()}
         self.pages.insert_one(page_data)
 
@@ -77,7 +82,7 @@ class WikiPagesConnector(BaseConnector):
                                         "title": page_title}})
 
     def search_pages(self, search_query: str):
-        pass
+        return self.pages.find({"$text": {"$search": search_query.lower()}})
 
     def get_page_data(self, page_name : str):
         page_data = self.pages.find_one({"_id" : page_name})
@@ -90,3 +95,8 @@ class WikiPagesConnector(BaseConnector):
     def get_random_page(self):
         result = self.pages.aggregate({"$sample": {"size": 1}})
         return result[0]["_id"]
+
+    def get_last_edited(self, number : int):
+        return  self.pages.aggregate([{"$unwind": "$history"},
+                                      {"$sort": {"history.edition_time": 1}},
+                                      {"$limit": number}])
