@@ -18,6 +18,8 @@ app.config.from_envvar('DEV_SETTINGS', silent=True)
 # flask-login
 login_manager = LoginManager()
 login_manager.init_app(app)
+login_manager.login_view = "login"
+login_manager.login_message = "Vous devez être connectés pour créer ou éditer des pages"
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -98,12 +100,11 @@ def page(page_name):
 
 
 @app.route("/page/<page_name>/edit", methods=['GET', 'POST'])
+@login_required
 @autologin
 def page_edit(page_name):
     """Page edition form"""
     # TODO : faire une fonction preview aussi
-    if "user" not in session:
-        return render_template("error.html", message="Vous devez être connectés pour éditer la page")
 
     user_cnctr = UsersConnector()
     if not user_cnctr.is_allowed(session["user"]['cookie']):
@@ -131,13 +132,11 @@ def page_edit(page_name):
 
 
 @app.route("/page/create", methods=['GET', 'POST'])
+@login_required
 @autologin
 def page_create():
     """Page creation form (almost the same as the page edition form"""
-
-    if "user" not in session:
-        return render_template("error.html", message="Vous devez être connectés pour éditer la page")
-
+    #  TODO : faire une fonction preview aussi
     user_cnctr = UsersConnector()
     if not user_cnctr.is_allowed(session["user"]['cookie']):
         return render_template("error.html", message="Vous n'êtes pas encore autorisés à éditer des pages")
@@ -217,23 +216,22 @@ def admin():
 @app.route("/history")
 @autologin
 def history():
-    """Search for a wiki page"""
+    """History of the loult website"""
     return render_template("history.html")
 
 
 @app.route("/faq")
 @autologin
 def faq():
-    """Search for a wiki page"""
+    """FAQ of the wiki"""
     return render_template("faq.html")
 
 
 @app.route("/rules")
 @autologin
 def rules():
-    """Search for a wiki page"""
+    """Wiki rules"""
     return render_template("rules.html")
-
 
 
 def main():
