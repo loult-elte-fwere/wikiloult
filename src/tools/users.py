@@ -4,6 +4,7 @@ from colorsys import hsv_to_rgb
 from hashlib import md5
 from salt import SALT
 from struct import pack
+from flask_login import UserMixin 
 
 
 with open(path.join(path.dirname(path.realpath(__file__)), "data/adjectifs.txt")) as adj_file:
@@ -40,7 +41,7 @@ class PokeParameters:
                    (cookie_hash[5] | (cookie_hash[6] << 13)) % len(adjectives) + 1) # poke id
 
 
-class User:
+class User(UserMixin):
 
     def __init__(self, cookie):
         cookie_hash = md5((cookie + SALT).encode('utf8')).digest()

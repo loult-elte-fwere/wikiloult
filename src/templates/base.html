@@ -32,8 +32,15 @@
               {% endblock %}
               </div>
               <ul class="nav navbar-nav navbar-right">
-                <li><a class="btn btn-info center" href="{{ url_for('login') }}">
+                <li>
+                  {{ current_user.is_authenticated }}
+                  {% if current_user.is_authenticated %}
+                  <a class="btn btn-info center" href="{{ url_for('logout') }}">
                     <span class="glyphicon glyphicon-log-in"></span>Connexion</a>
+                  {% else %}
+                  <a class="btn btn-info center" href="{{ url_for('login') }}">
+                    <span class="glyphicon glyphicon-log-in"></span>Connexion</a>
+                  {% endif %}
                 </li>
               </ul>
             </div>
