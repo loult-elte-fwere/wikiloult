@@ -1,4 +1,4 @@
-from flask import Flask, render_template, session, redirect, url_for, request, make_response
+from flask import Flask, render_template, session, redirect, url_for, request, make_response, abort
 from functools import wraps
 import re
 
@@ -26,6 +26,10 @@ def autologin(function):
 
     return function
 
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
 
 @app.route("/")
 @autologin
@@ -76,8 +80,11 @@ def logout():
 def page(page_name):
     """Display a wiki page"""
     page_cnctr = WikiPagesConnector()
+    page_data = page_cnctr.get_page_data(page_name)
+    if page_data is None:
+        abort(404)
     return render_template("wiki_page.html",
-                           page_data=page_cnctr.get_page_data(page_name),
+                           page_data=page_data,
                            page_name=page_name)
 
 
@@ -156,7 +163,12 @@ def page_create():
 @autologin
 def user_page(user_id):
     """User's personal page"""
-    return render_template("index.html")
+    user_cnctr = UsersConnector()
+    user_data = user_cnctr.get_user_data(user_id)
+    if user_data is None:
+        abort(404)
+
+    return render_template("user_page.html", user_data=user_data)
 
 
 @app.route("/search")

@@ -1,5 +1,10 @@
+import datetime
+
 from pymongo import MongoClient
 from config import DB_ADDRESS, USERS_COLLECTION_NAME, PAGES_COLLECTION_NAME
+
+from .users import User
+from .rendering import WikiPageRenderer
 
 
 class BaseConnector:
@@ -18,22 +23,28 @@ class UsersConnector(BaseConnector):
         self.users = self.db[USERS_COLLECTION_NAME]
 
     def user_exists(self, user_cookie : str) -> bool:
-        pass
+        result = self.users.find_one({"_id": user_cookie})
+        return result is not None
 
     def register_user(self, user_cookie: str):
         """Registers user cookie as a new user. Sets authorization to pending."""
-        pass
+        user_obj = User(user_cookie)
+        new_user_data = {"_id": user_cookie,
+                         "is_allowed": False,
+                         "short_id": user_obj.user_id,
+                         "modifications": [],
+                         "registration_date": datetime.datetime.utcnow(),
+                         "personal_text_raw": None,
+                         "personal_text_render": None}
+        self.users.insert_one(new_user_data)
 
-    def authorize_user(self, user_cookie: str):
-        """Authorize user to create/edit pages"""
-        pass
-
-    def get_user_data(self, user_cookie: str):
-        pass
+    def get_user_data(self, user_id: str):
+        return self.users.find_one({"short_id": user_id})
 
     def is_allowed(self, user_cookie: str) -> bool:
         """Looks up if a user is allowed to edit/create pages or not"""
-        pass
+        result = self.users.find_one({"_id": user_cookie})
+        return False if result is None else result["is_allowed"]
 
 
 class WikiPagesConnector(BaseConnector):
@@ -43,16 +54,39 @@ class WikiPagesConnector(BaseConnector):
         self.pages = self.db[PAGES_COLLECTION_NAME]
 
     def create_page(self, page_name : str, markdown_content: str, page_title: str, editor_cookie: str):
-        pass
+        markdown_renderer = WikiPageRenderer()
+        page_render = markdown_renderer.render(markdown_content)
+        page_data = {"_id": page_name,
+                     "title": page_title,
+                     "html_content": page_render,
+                     "history" : [{"editor": editor_cookie,
+                                   "markdown": markdown_content,
+                                   "edition_time": datetime.datetime.utcnow()}],
+                     "creation_date": datetime.datetime.utcnow()}
+        self.pages.insert_one(page_data)
 
     def edit_page(self, page_name: str, markdown_content: str, page_title: str, editor_cookie : str):
-        pass
+        markdown_renderer = WikiPageRenderer()
+        new_render = markdown_renderer.render(markdown_content)
+        history_entry = {"editor": editor_cookie,
+                         "markdown": markdown_content,
+                         "edition_time": datetime.datetime.utcnow()}
+        self.pages.update_one({"_id": page_name},
+                              {"$push": {"history": history_entry},
+                               "$set": {"html_content": new_render,
+                                        "title": page_title}})
 
     def search_pages(self, search_query: str):
         pass
 
     def get_page_data(self, page_name : str):
-        pass
+        page_data = self.pages.find_one({"_id" : page_name})
+        if page_data is None:
+            return None
+        page_data["history"] = [{"editor" : User(entry["editor"]),
+                                 "edition_time": entry["edition_time"]} for entry in page_data["history"]]
+        return page_data
 
     def get_random_page(self):
-        pass
+        result = self.pages.aggregate({"$sample": {"size": 1}})
+        return result[0]["_id"]
