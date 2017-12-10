@@ -1,4 +1,5 @@
 from flask import Flask, render_template, session, redirect, url_for, request, make_response, abort
+from flask_login import LoginManager, login_required
 from functools import wraps
 import re
 
@@ -13,6 +14,14 @@ app.config['SECRET_KEY'] = SECRET_KEY
 app.config['DEBUG'] = True
 
 app.config.from_envvar('DEV_SETTINGS', silent=True)
+
+# flask-login
+login_manager = LoginManager()
+login_manager.init_app(app)
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.get(user_id)
 
 
 def autologin(function):
@@ -58,7 +67,6 @@ def login():
         else:
             message = "Connectèw."
 
-        # TypeError: <tools.users.User object at ... > is not JSON serializable
         session["user"] = User(user_cookie).serialize()
         resp = make_response(render_template("login.html", message=message))
         resp.set_cookie("id", user_cookie)
@@ -66,6 +74,7 @@ def login():
 
 
 @app.route("/logout")
+@login_required
 @autologin
 def logout():
     """Logout of the website : destroy session and delete the cookie"""
@@ -196,6 +205,11 @@ def last_edits():
     page_cnctr = WikiPagesConnector()
     return render_template("last_edited.html", pages_list=page_cnctr.get_last_edited(10))
 
+@app.route("/admin")
+@login_required
+def admin():
+    """Access the admin interface"""
+    pass
 
 
 #### routes for static pages
