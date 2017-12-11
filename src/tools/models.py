@@ -65,22 +65,24 @@ class WikiPagesConnector(BaseConnector):
         page_data = {"_id": page_name,
                      "title": page_title,
                      "html_content": page_render,
-                     "history": [{"editor": editor_userid,
+                     "history": [{"editor_id": editor_userid,
                                   "markdown": markdown_content,
                                   "edition_time": datetime.datetime.utcnow()}],
+                     "last_edit": datetime.datetime.utcnow(),
                      "creation_date": datetime.datetime.utcnow()}
         self.pages.insert_one(page_data)
 
     def edit_page(self, page_name: str, markdown_content: str, page_title: str, editor_userid : str):
         markdown_renderer = WikiPageRenderer()
         new_render = markdown_renderer.render(escape(markdown_content))
-        history_entry = {"editor": editor_userid,
+        history_entry = {"editor_id": editor_userid,
                          "markdown": markdown_content,
                          "edition_time": datetime.datetime.utcnow()}
         self.pages.update_one({"_id": page_name},
                               {"$push": {"history": history_entry},
                                "$set": {"html_content": new_render,
-                                        "title": page_title}})
+                                        "title": page_title,
+                                        "last_edit": datetime.datetime.utcnow()}})
 
     def search_pages(self, search_query: str):
         return self.pages.find({"$text": {"$search": search_query.lower()}})
@@ -89,7 +91,7 @@ class WikiPagesConnector(BaseConnector):
         page_data = self.pages.find_one({"_id" : page_name})
         if page_data is None:
             return None
-        page_data["history"] = [{"editor" : User(entry["editor"]),
+        page_data["history"] = [{"editor" : User(entry["editor_id"]),
                                  "edition_time": entry["edition_time"]} for entry in page_data["history"]]
         return page_data
 

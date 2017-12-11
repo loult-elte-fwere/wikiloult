@@ -8,7 +8,7 @@ from flask_login import LoginManager, login_required, login_user, current_user, 
 from config import SECRET_KEY
 from tools.models import UsersConnector, WikiPagesConnector
 from tools.users import User
-from tools.admin import UserView, CheckCookieAdminView
+from tools.admin import UserView, PageView, CheckCookieAdminView
 
 app = Flask(__name__)
 
@@ -26,6 +26,7 @@ login_manager.login_message = "Vous devez être connectés pour créer ou édite
 # Setting up flask-admin
 admin = admin.Admin(app, name='Wikiloult Admin', index_view=CheckCookieAdminView())
 admin.add_view(UserView(UsersConnector().users, 'Users'))
+admin.add_view(PageView(WikiPagesConnector().pages, 'Pages'))
 
 @login_manager.user_loader
 def load_user(user_cookie):
@@ -39,7 +40,7 @@ def autologin(function):
         set by a past login, by setting the session"""
         cookie = request.cookies.get("id", None)
         if cookie is not None:
-            session["user"] = User(cookie).serialize()
+            login_user(User(cookie))
 
     return function
 
@@ -107,7 +108,7 @@ def page_edit(page_name):
     # TODO : faire une fonction preview aussi
 
     user_cnctr = UsersConnector()
-    if not user_cnctr.is_allowed(session["user"]['cookie']):
+    if not user_cnctr.is_allowed(current_user.cookie):
         return render_template("error.html", message="Vous n'êtes pas encore autorisés à éditer des pages")
 
     page_cnctr = WikiPagesConnector()
@@ -138,7 +139,7 @@ def page_create():
     """Page creation form (almost the same as the page edition form"""
     #  TODO : faire une fonction preview aussi
     user_cnctr = UsersConnector()
-    if not user_cnctr.is_allowed(session["user"]['cookie']):
+    if not user_cnctr.is_allowed(current_user.cookie):
         return render_template("error.html", message="Vous n'êtes pas encore autorisés à éditer des pages")
 
     page_cnctr = WikiPagesConnector()
@@ -163,7 +164,7 @@ def page_create():
                                    page_name=page_name,
                                    message=error_message)
 
-        page_cnctr.create_page(page_name.lower(), markdown_content, title, session["user"]['user_id'])
+        page_cnctr.create_page(page_name.lower(), markdown_content, title, current_user.user_id)
         return redirect(url_for("page", page_name=page_name))
     return render_template("index.html")
 
