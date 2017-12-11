@@ -1,5 +1,7 @@
 import re
 from functools import wraps
+from os.path import join, dirname, realpath
+from os import makedirs
 
 import flask_admin as admin
 from flask import Flask, render_template, session, redirect, url_for, request, make_response, abort
@@ -9,8 +11,12 @@ from config import SECRET_KEY
 from tools.models import UsersConnector, WikiPagesConnector
 from tools.users import User
 from tools.admin import UserView, PageView, CheckCookieAdminView
+from tools.rendering import audio_render
 
 app = Flask(__name__)
+
+AUDIO_RENDER_FOLDER = join(dirname(realpath(__file__)), "static/sound/")
+
 
 app.config['SECRET_KEY'] = SECRET_KEY
 app.config['DEBUG'] = True
@@ -97,7 +103,8 @@ def page(page_name):
         abort(404)
     return render_template("wiki_page.html",
                            page_data=page_data,
-                           page_name=page_name)
+                           page_name=page_name,
+                           tile_audio_filename=page_name + ".wav")
 
 
 @app.route("/page/<page_name>/edit", methods=['GET', 'POST'])
@@ -128,6 +135,7 @@ def page_edit(page_name):
                                    message="Le titre ni le contenu ne doivent être vides.")
 
         page_cnctr.edit_page(page_name, markdown_content, title, session["user"]['user_id'])
+        audio_render(title, join(AUDIO_RENDER_FOLDER, page_name + ".wav"))
         user_cnctr.add_modification(session["user"]['cookie'], page_name)
         return redirect(url_for("page", page_name=page_name))
 
@@ -165,6 +173,11 @@ def page_create():
                                    message=error_message)
 
         page_cnctr.create_page(page_name.lower(), markdown_content, title, current_user.user_id)
+        try:
+            makedirs(AUDIO_RENDER_FOLDER)
+        except FileExistsError:
+            pass
+        audio_render(title, join(AUDIO_RENDER_FOLDER, page_name + ".wav"))
         return redirect(url_for("page", page_name=page_name))
     return render_template("index.html")
 
