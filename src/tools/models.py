@@ -1,4 +1,5 @@
 import datetime
+from html import escape
 
 from pymongo import MongoClient
 from config import DB_ADDRESS, USERS_COLLECTION_NAME, PAGES_COLLECTION_NAME
@@ -60,7 +61,7 @@ class WikiPagesConnector(BaseConnector):
 
     def create_page(self, page_name : str, markdown_content: str, page_title: str, editor_userid: str):
         markdown_renderer = WikiPageRenderer()
-        page_render = markdown_renderer.render(markdown_content)
+        page_render = markdown_renderer.render(escape(markdown_content))
         page_data = {"_id": page_name,
                      "title": page_title,
                      "html_content": page_render,
@@ -72,7 +73,7 @@ class WikiPagesConnector(BaseConnector):
 
     def edit_page(self, page_name: str, markdown_content: str, page_title: str, editor_userid : str):
         markdown_renderer = WikiPageRenderer()
-        new_render = markdown_renderer.render(markdown_content)
+        new_render = markdown_renderer.render(escape(markdown_content))
         history_entry = {"editor": editor_userid,
                          "markdown": markdown_content,
                          "edition_time": datetime.datetime.utcnow()}

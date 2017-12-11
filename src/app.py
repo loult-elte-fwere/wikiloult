@@ -1,12 +1,14 @@
-from flask import Flask, render_template, session, redirect, url_for, request, make_response, abort
-from flask_login import LoginManager, login_required
-from functools import wraps
 import re
+from functools import wraps
 
-from tools.models import UsersConnector, WikiPagesConnector
-from tools.users import User
+import flask_admin as admin
+from flask import Flask, render_template, session, redirect, url_for, request, make_response, abort
+from flask_login import LoginManager, login_required, login_user, current_user, logout_user
 
 from config import SECRET_KEY
+from tools.models import UsersConnector, WikiPagesConnector
+from tools.users import User
+from tools.admin import UserView, CheckCookieAdminView
 
 app = Flask(__name__)
 
@@ -21,9 +23,13 @@ login_manager.init_app(app)
 login_manager.login_view = "login"
 login_manager.login_message = "Vous devez être connectés pour créer ou éditer des pages"
 
+# Setting up flask-admin
+admin = admin.Admin(app, name='Wikiloult Admin', index_view=CheckCookieAdminView())
+admin.add_view(UserView(UsersConnector().users, 'Users'))
+
 @login_manager.user_loader
-def load_user(user_id):
-    return User.get(user_id)
+def load_user(user_cookie):
+    return User(user_cookie)
 
 
 def autologin(function):
@@ -42,6 +48,7 @@ def autologin(function):
 def page_not_found(e):
     return render_template('404.html'), 404
 
+
 @app.route("/")
 @autologin
 def home():
@@ -52,9 +59,6 @@ def home():
 @autologin
 def login():
     """User login page"""
-    if "user" in session:
-        return redirect(url_for("user_page", user_id=session["user"]['user_id']))
-
     if request.method == "GET":
         return render_template("login.html")
 
@@ -69,10 +73,8 @@ def login():
         else:
             message = "Connectèw."
 
-        session["user"] = User(user_cookie).serialize()
-        resp = make_response(render_template("login.html", message=message))
-        resp.set_cookie("id", user_cookie)
-        return resp
+        login_user(User(user_cookie))
+        return render_template("login.html", message=message)
 
 
 @app.route("/logout")
@@ -80,10 +82,8 @@ def login():
 @autologin
 def logout():
     """Logout of the website : destroy session and delete the cookie"""
-    session.pop("user", None)
-    resp = make_response(render_template("index.html"))
-    resp.set_cookie('id', '', expires=0) # destroy the cookie by making it expire immediately
-    return resp
+    logout_user()
+    return render_template("index.html")
 
 
 @app.route("/page/<page_name>")
@@ -204,13 +204,6 @@ def last_edits():
     page_cnctr = WikiPagesConnector()
     return render_template("last_edited.html", pages_list=page_cnctr.get_last_edited(10))
 
-@app.route("/admin")
-@login_required
-def admin():
-    """Access the admin interface"""
-    pass
-
-
 #### routes for static pages
 
 @app.route("/history")
@@ -237,5 +230,5 @@ def rules():
 def main():
     app.run()
 
-if(__name__ == "__main__"):
+if __name__ == "__main__":
     main()

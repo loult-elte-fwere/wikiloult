@@ -50,8 +50,5 @@ class User(UserMixin):
         self.cookie = cookie
         self.user_id = cookie_hash.hex()[-16:]
 
-    def serialize(self):
-        return {
-            'cookie' : self.cookie,
-            'user_id' : self.user_id
-        }
+    def get_id(self):
+        return self.cookie

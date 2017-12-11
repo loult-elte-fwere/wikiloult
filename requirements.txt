@@ -1,5 +1,6 @@
 flask
 flask-login
+flask-admin
 mistune
 pymongo
 voxpopuli
