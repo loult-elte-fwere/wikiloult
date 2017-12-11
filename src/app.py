@@ -1,17 +1,17 @@
 import re
 from functools import wraps
-from os.path import join, dirname, realpath
 from os import makedirs
+from os.path import join, dirname, realpath
 
 import flask_admin as admin
-from flask import Flask, render_template, session, redirect, url_for, request, make_response, abort
+from flask import Flask, render_template, session, redirect, url_for, request, abort
 from flask_login import LoginManager, login_required, login_user, current_user, logout_user
 
 from config import SECRET_KEY
-from tools.models import UsersConnector, WikiPagesConnector
-from tools.users import User
 from tools.admin import UserView, PageView, CheckCookieAdminView
+from tools.models import UsersConnector, WikiPagesConnector
 from tools.rendering import audio_render
+from tools.users import User
 
 app = Flask(__name__)
 
@@ -134,9 +134,9 @@ def page_edit(page_name):
                                    page_title=title,
                                    message="Le titre ni le contenu ne doivent être vides.")
 
-        page_cnctr.edit_page(page_name, markdown_content, title, session["user"]['user_id'])
+        page_cnctr.edit_page(page_name, markdown_content, title, current_user.cookie)
         audio_render(title, join(AUDIO_RENDER_FOLDER, page_name + ".wav"))
-        user_cnctr.add_modification(session["user"]['cookie'], page_name)
+        user_cnctr.add_modification(current_user.cookie, page_name)
         return redirect(url_for("page", page_name=page_name))
 
 
@@ -172,7 +172,7 @@ def page_create():
                                    page_name=page_name,
                                    message=error_message)
 
-        page_cnctr.create_page(page_name.lower(), markdown_content, title, current_user.user_id)
+        page_cnctr.create_page(page_name.lower(), markdown_content, title, current_user.cookie)
         try:
             makedirs(AUDIO_RENDER_FOLDER)
         except FileExistsError:

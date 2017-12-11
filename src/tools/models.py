@@ -41,8 +41,8 @@ class UsersConnector(BaseConnector):
 
     def add_modification(self, user_cookie : str, page_name : str):
         self.users.update_one({"_id": user_cookie},
-                              {"$push": {"modifications" : {"page": page_name,
-                                                            "date": datetime.datetime.utcnow()}}})
+                              {"$push": {"modifications": {"page": page_name,
+                                                           "date": datetime.datetime.utcnow()}}})
 
     def get_user_data(self, user_id: str):
         return self.users.find_one({"short_id": user_id})
@@ -59,23 +59,23 @@ class WikiPagesConnector(BaseConnector):
         super().__init__()
         self.pages = self.db[PAGES_COLLECTION_NAME]
 
-    def create_page(self, page_name : str, markdown_content: str, page_title: str, editor_userid: str):
+    def create_page(self, page_name : str, markdown_content: str, page_title: str, editor_cookie: str):
         markdown_renderer = WikiPageRenderer()
         page_render = markdown_renderer.render(escape(markdown_content))
         page_data = {"_id": page_name,
                      "title": page_title,
                      "html_content": page_render,
-                     "history": [{"editor_id": editor_userid,
+                     "history": [{"editor_cookie": editor_cookie,
                                   "markdown": markdown_content,
                                   "edition_time": datetime.datetime.utcnow()}],
                      "last_edit": datetime.datetime.utcnow(),
                      "creation_date": datetime.datetime.utcnow()}
         self.pages.insert_one(page_data)
 
-    def edit_page(self, page_name: str, markdown_content: str, page_title: str, editor_userid : str):
+    def edit_page(self, page_name: str, markdown_content: str, page_title: str, editor_cookie: str):
         markdown_renderer = WikiPageRenderer()
         new_render = markdown_renderer.render(escape(markdown_content))
-        history_entry = {"editor_id": editor_userid,
+        history_entry = {"editor_cookie": editor_cookie,
                          "markdown": markdown_content,
                          "edition_time": datetime.datetime.utcnow()}
         self.pages.update_one({"_id": page_name},
@@ -91,7 +91,7 @@ class WikiPagesConnector(BaseConnector):
         page_data = self.pages.find_one({"_id" : page_name})
         if page_data is None:
             return None
-        page_data["history"] = [{"editor" : User(entry["editor_id"]),
+        page_data["history"] = [{"editor" : User(entry["editor_cookie"]),
                                  "edition_time": entry["edition_time"]} for entry in page_data["history"]]
         return page_data
 

@@ -41,10 +41,9 @@ class PageView(ModelView):
     def get_list(self, *args, **kwargs):
         """Mostly just to get the last editor"""
         count, data = super().get_list(*args, **kwargs)
-        usr_cnctr = UsersConnector()
         for item in data:
             sorted_by_date = sorted(item["history"], key=itemgetter('edition_time'))
-            last_editor = User(usr_cnctr.get_user_data(sorted_by_date[0]["editor_id"])["_id"])
+            last_editor = User(sorted_by_date[0]["editor_cookie"])
             item["last_editor"] = last_editor.poke_params.pokename + " " + last_editor.poke_params.poke_adj
 
         return count, data
