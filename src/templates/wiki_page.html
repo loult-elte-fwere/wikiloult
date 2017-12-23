@@ -2,21 +2,29 @@
 
 {% block headernav %}
 <ul class="list-inline">
-  <li class="list-inline-item"><a  href="{{ url_for('page_create') }}">Nouvelle page</a></li>
-  <li class="list-inline-item"><a  href="{{ url_for('page_edit', page_name=page_name ) }}">Editer</a></li>
-  <li class="list-inline-item"><a  href="{{ url_for('login') }}">Historique</a></li>
+    <li class="list-inline-item"><a  href="{{ url_for('page_create') }}">Nouvelle page</a></li>
+    <li class="list-inline-item"><a  href="{{ url_for('page_edit', page_name=page_name ) }}">Editer</a></li>
+    <li class="list-inline-item"><a  href="{{ url_for('login') }}">Historique</a></li>
 </ul>
 {% endblock %}
 
 {% block body %}
 <div class="container">
-  <h2 class="text-center"> {{ page_name|title }} </h2>
-  {% if page_data != None %}
-  {{ page_data }}
-  {% else %}
-  <div class="alert alert-info">
-    Aucun contenu rédigé pour cette page à ce jour.
-  </div>
-  {% endif %}
+    {% if page_data != None %}
+        <audio>
+            <source src="{{ url_for('static', filename='sound/' + page_name + '.wav') }}"></source>
+        </audio>
+        <h2 class="text-center" onmouseover="playclip();"> {{ page_data.title|title }} </h2>
+        {{ page_data }}
+    {% else %}
+    <div class="alert alert-info">
+        Aucun contenu rédigé pour cette page à ce jour. Vous pouvez
+        <a href="{{ url_for('page_create') }}">créer cette page</a>.
+    </div>
+    {% endif %}
 </div>
+{% endblock %}
+
+{% block custom_js %}
+    <script src="{{ url_for('static', filename='js/wiki_page.js') }}"></script>
 {% endblock %}

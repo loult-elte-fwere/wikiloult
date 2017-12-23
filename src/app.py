@@ -99,8 +99,6 @@ def page(page_name):
     """Display a wiki page"""
     page_cnctr = WikiPagesConnector()
     page_data = page_cnctr.get_page_data(page_name)
-    if page_data is None:
-        abort(404)
     return render_template("wiki_page.html",
                            page_data=page_data,
                            page_name=page_name,

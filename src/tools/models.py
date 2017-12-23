@@ -63,7 +63,7 @@ class WikiPagesConnector(BaseConnector):
         markdown_renderer = WikiPageRenderer()
         page_render = markdown_renderer.render(escape(markdown_content))
         page_data = {"_id": page_name,
-                     "title": page_title,
+                     "title": escape(page_title),
                      "html_content": page_render,
                      "history": [{"editor_cookie": editor_cookie,
                                   "markdown": markdown_content,
@@ -81,11 +81,11 @@ class WikiPagesConnector(BaseConnector):
         self.pages.update_one({"_id": page_name},
                               {"$push": {"history": history_entry},
                                "$set": {"html_content": new_render,
-                                        "title": page_title,
+                                        "title": escape(page_title),
                                         "last_edit": datetime.datetime.utcnow()}})
 
     def search_pages(self, search_query: str):
-        return self.pages.find({"$text": {"$search": search_query.lower()}})
+        return list(self.pages.find({"$text": {"$search": search_query.lower()}}))
 
     def get_page_data(self, page_name : str):
         page_data = self.pages.find_one({"_id" : page_name})
