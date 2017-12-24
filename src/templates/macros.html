@@ -1,0 +1,4 @@
+{% macro format_user(user_obj) -%}
+    <img src="{{ url_for('static', filename='images/pokemon/' + user_obj.poke_params.img + '.gif') }}">
+    <span style="color: {{ user_obj.poke_params.color }};">{{ user_obj.poke_params.pokename + " " + user_obj.poke_params.poke_adj }}</span>
+{%- endmacro %}

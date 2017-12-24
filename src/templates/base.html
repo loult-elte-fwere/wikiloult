@@ -1,3 +1,5 @@
+{% from 'macros.html' import format_user %}
+
 <!doctype html>
 
 <html>
@@ -8,6 +10,7 @@
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    {% block custom_css %}{% endblock %}
 
     <meta name="description" content="Le wiki du Loult" />
     {% block head %}
@@ -15,16 +18,17 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}" />
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
     {% endblock %}
+
   </head>
   <body>
     <div class="container-fluid">
       <div class="row">
-        <div class="col-sm-2">
+        <div class="col-md-2">
           <a>
             <img src="{{ url_for('static', filename='images/logo_wiki.svg') }}" alt="loult logo" />
           </a>
         </div>
-        <div class="col-sm-10 right">
+        <div class="col-md-10 right">
           <nav class="navbar navbar-default">
             <div class="container-fluid">
               <div class="navbar navbar-header">
@@ -33,10 +37,10 @@
               </div>
               <ul class="nav navbar-nav navbar-right">
                 <li>
-                  {{ current_user.is_authenticated }}
                   {% if current_user.is_authenticated %}
+                  {{ format_user(current_user) }}
                   <a class="btn btn-info center" href="{{ url_for('logout') }}">
-                    <span class="glyphicon glyphicon-log-in"></span>Connexion</a>
+                    <span class="glyphicon glyphicon-log-in"></span>Déconnexion</a>
                   {% else %}
                   <a class="btn btn-info center" href="{{ url_for('login') }}">
                     <span class="glyphicon glyphicon-log-in"></span>Connexion</a>
@@ -48,7 +52,7 @@
         </div>
       </div>
       <div class="row">
-        <div class="col-sm-2">
+        <div class="col-md-2">
           <div>
             <form method="get">
               <div class="form-group" action="{{ url_for('search_page') }}">
@@ -78,7 +82,7 @@
             </ul>
           </div>
         </div>
-        <div class="col-sm-10">
+        <div class="col-md-10">
           <main>
             {% block body %}{% endblock %}
           </main>

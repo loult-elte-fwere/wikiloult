@@ -1,4 +1,6 @@
 {% extends "base.html" %}
+{% from 'macros.html' import format_user %}
+
 
 {% block headernav %}
 <ul class="list-inline">
@@ -15,11 +17,28 @@
             <source src="{{ url_for('static', filename='sound/' + page_name + '.wav') }}"></source>
         </audio>
         <h2 class="text-center" onmouseover="playclip();"> {{ page_data.title|title }} </h2>
-        {{ page_data }}
+        <div class="row">
+            <div class="col-md-9">
+                {{ page_data.html_content | safe }}
+                {{ page_data}}
+            </div>
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-block" style="padding: 10px;">
+                        <h4 class="card-title">Derniers éditeurs</h4>
+                    </div>
+                    <ul class="list-group list-group-flush">
+                        {% for edit in page_data.history %}
+                            <li class="list-group-item">{{ format_user(edit.editor) }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
     {% else %}
     <div class="alert alert-info">
         Aucun contenu rédigé pour cette page à ce jour. Vous pouvez
-        <a href="{{ url_for('page_create') }}">créer cette page</a>.
+        <a href="{{ url_for('page_create', page_name=page_name) }}">créer cette page</a>.
     </div>
     {% endif %}
 </div>

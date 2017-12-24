@@ -2,6 +2,7 @@ import re
 from functools import wraps
 from os import makedirs
 from os.path import join, dirname, realpath
+from html import escape
 
 import flask_admin as admin
 from flask import Flask, render_template, session, redirect, url_for, request, abort
@@ -10,7 +11,7 @@ from flask_login import LoginManager, login_required, login_user, current_user, 
 from config import SECRET_KEY
 from tools.admin import UserView, PageView, CheckCookieAdminView
 from tools.models import UsersConnector, WikiPagesConnector
-from tools.rendering import audio_render
+from tools.rendering import audio_render, WikiPageRenderer
 from tools.users import User
 
 app = Flask(__name__)
@@ -110,8 +111,6 @@ def page(page_name):
 @autologin
 def page_edit(page_name):
     """Page edition form"""
-    # TODO : faire une fonction preview aussi
-
     user_cnctr = UsersConnector()
     if not user_cnctr.is_allowed(current_user.cookie):
         return render_template("error.html", message="Vous n'êtes pas encore autorisés à éditer des pages")
@@ -120,14 +119,26 @@ def page_edit(page_name):
     if request.method == "GET":
         page_data = page_cnctr.get_page_data(page_name)
         return render_template("page_edit.html",
+                               page_name=page_name,
                                page_content=page_data["markdown_content"],
                                page_title=page_data["title"])
 
     elif request.method == "POST":
         title = request.form["title"]
         markdown_content = request.form["content"]
+
+        if request.form.get("preview", None) is not None:
+            markdown_renderer = WikiPageRenderer()
+            html_render = markdown_renderer.render(escape(markdown_content))
+            return render_template("page_edit.html",
+                                   page_name=page_name,
+                                   page_content=markdown_content,
+                                   page_title=title,
+                                   preview=html_render)
+
         if not title.strip() or not markdown_content.strip():
             return render_template("page_edit.html",
+                                   page_name=page_name,
                                    page_content=markdown_content,
                                    page_title=title,
                                    message="Le titre ni le contenu ne doivent être vides.")
@@ -143,19 +154,28 @@ def page_edit(page_name):
 @autologin
 def page_create():
     """Page creation form (almost the same as the page edition form"""
-    #  TODO : faire une fonction preview aussi
     user_cnctr = UsersConnector()
     if not user_cnctr.is_allowed(current_user.cookie):
         return render_template("error.html", message="Vous n'êtes pas encore autorisé à éditer des pages")
 
     page_cnctr = WikiPagesConnector()
     if request.method == "GET":
-        return render_template("page_create.html")
+        return render_template("page_create.html",
+                               page_name=request.args.get("page_name", None))
 
     elif request.method == "POST":
         page_name = request.form["name"]
         title = request.form["title"]
         markdown_content = request.form["content"]
+
+        if request.form.get("preview", None) is not None:
+            markdown_renderer = WikiPageRenderer()
+            html_render = markdown_renderer.render(escape(markdown_content))
+            return render_template("page_create.html",
+                                   page_content=markdown_content,
+                                   page_title=title,
+                                   page_name=page_name,
+                                   preview=html_render)
 
         error_message = None
         if not title.strip() or not markdown_content.strip() or not page_name.strip():

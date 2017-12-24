@@ -65,6 +65,7 @@ class WikiPagesConnector(BaseConnector):
         page_data = {"_id": page_name,
                      "title": escape(page_title),
                      "html_content": page_render,
+                     "markdown_content": markdown_content,
                      "history": [{"editor_cookie": editor_cookie,
                                   "markdown": markdown_content,
                                   "edition_time": datetime.datetime.utcnow()}],
@@ -81,6 +82,7 @@ class WikiPagesConnector(BaseConnector):
         self.pages.update_one({"_id": page_name},
                               {"$push": {"history": history_entry},
                                "$set": {"html_content": new_render,
+                                        "markdown_content" : markdown_content,
                                         "title": escape(page_title),
                                         "last_edit": datetime.datetime.utcnow()}})
 

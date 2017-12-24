@@ -14,7 +14,7 @@
       <label for="name" class="control-label">Nom de la page (utilisé pour l'adresse de la page)</label>
       <input type="text" class="form-control" id="name" name="name"
              placeholder="Uniquement des lettres et tirets du bas. Exemple: a_sa_we"
-             value="{{ page_name if page_name is defined }}">
+             value="{{ page_name if page_name != None }}">
       <label for="title" class="control-label">Titre</label>
       <input type="text" class="form-control" id="title" name="title"
              value="{{ page_title if page_title is defined }}">
@@ -26,5 +26,6 @@
       </textarea>
     </div>
     <button type="submit" class="btn btn-submit">Valider</button>
+    <button type="submit" class="btn btn-submit" name="preview">Aperçu</button>
 </div>
 {% endblock %}
