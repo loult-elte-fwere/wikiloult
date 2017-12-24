@@ -9,18 +9,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     <!-- Bootstrap CSS -->
+    {% block css %}
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    {% endblock %}
+
     {% block custom_css %}{% endblock %}
 
     <meta name="description" content="Le wiki du Loult" />
     {% block head %}
     <title>Wiki Loult - {% block title %} Encyclopédie Loultiste{% endblock %}</title>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}" />
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
     {% endblock %}
 
   </head>
   <body>
+    {% block main %}
     <div class="container-fluid">
       <div class="row">
         <div class="col-md-2">
@@ -88,7 +91,8 @@
           </main>
           </div>
         </div>
-      </div>
+    </div>
+    {% endblock %}
       <!-- Optional JavaScript -->
       <!-- jQuery first, then Popper.js, then Bootstrap JS -->
       <script src="{{ url_for('static', filename='js/jquery-3.2.1.slim.min.js') }}"></script>

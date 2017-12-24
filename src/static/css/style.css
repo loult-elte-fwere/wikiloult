@@ -1,1 +1,182 @@
 /* tunw tunw */
+
+html {
+   font-family: sans-serif;
+   -ms-text-size-adjust: 100%;
+   -webkit-text-size-adjust: 100%;
+   font-size: 70%; 
+}
+
+body {
+    font-size: 1.3rem;
+    line-height: 1.5;
+    background-color: #fff;
+    font-family: sans-serif;
+    font-size: 1.3rem;
+    line-height: 1.5;
+    margin: .39rem 0;
+}
+
+a, a:active, a:focus {
+    outline: 0;
+    color: #36c;
+    text-decoration: none;
+}
+
+a:hover {
+   text-decoration: underline; 
+}
+
+strong {
+    font-weight: 700;
+}
+
+img {
+    border: 0;
+    vertical-align: middle;
+}
+
+.main-title {
+    margin: 30px 0 15px 0;
+    margin: 3rem 0 1.5rem 0;
+    padding: 10px 0;
+    padding: 1rem 0;
+    font-family: 'Linux Libertine','Hoefler Text',Georgia,'Times New Roman',Times,serif;
+    font-size: 30px;
+    font-size: 3rem;
+    font-weight: 400;
+    line-height: 33px;
+    line-height: 3.3rem;
+    text-align: center;
+    -moz-font-feature-settings: "ss05=1";
+    -moz-font-feature-settings: "ss05";
+    -webkit-font-feature-settings: "ss05";
+    -ms-font-feature-settings: "ss05";
+    font-feature-settings: "ss05";
+    font-variant: small-caps;
+}
+
+.main-title-slogan {
+    display: block;
+    margin-bottom: -20px;
+    margin-bottom: -2rem;
+    font-family: 'Linux Libertine',Georgia,Times,serif;
+    font-size: 16px;
+    font-size: 1.6rem;
+    -webkit-font-feature-settings: normal;
+    -moz-font-feature-settings: normal;
+    font-feature-settings: normal;
+    font-variant: normal;
+    font-weight: 400;
+}
+
+.central-wiki-wrapper {
+    position: relative;
+    height: 32.5rem;
+    width: 54.6rem;
+    max-width: 100%;
+    margin: 0 auto;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.logo {
+    line-height: 26em;
+}
+
+.logo-wrapper {
+    line-height: 312px;
+    line-height: 31.2rem;
+    vertical-align: middle;
+}
+
+.central-wiki-elem {
+    position:absolute;
+    width: 15.6rem; 
+    display: block;
+    padding: 0;
+    text-decoration: none;
+    white-space: normal;
+}
+
+.elem1 {
+    top: 0;
+    right: 60%;
+}
+
+.elem2 {
+    top: 0;
+    left: 60%;
+}
+
+.elem3 {
+    top: 20%;
+    right: 70%;
+}
+
+.elem4 {
+    top: 20%;
+    left: 70%;
+}
+
+.elem5 {
+    top: 40%;
+    right: 72%;
+}
+
+.elem6 {
+    top: 40%;
+    left: 72%;
+}
+
+.elem7 {
+    top: 60%;
+    right: 70%;
+}
+
+.elem8 {
+    top: 60%;
+    left: 70%;
+}
+
+.elem9 {
+    top: 80%;
+    right: 60%;
+}
+
+.elem10 {
+    top: 80%;
+    left: 60%;
+}
+
+.search-container {
+    float: none;
+    max-width: 95%;
+    width: 540px;
+    margin: 0 auto 1.95rem auto;
+    padding: .39rem;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.search-input {
+    display: inline-block;
+    position: relative;
+    margin-right: .8rem;
+    vertical-align: top;
+}
+
+#searchInput {
+    padding: .8rem;
+    padding-right: 0.8rem;
+    font-size: 1.6rem;
+}
+
+.search-container button {
+    padding: .8rem 1.6rem;
+    font-size: 1.6rem;
+    background-color: #36c;
+    color: #fff;
+    border: none;
+    border-radius: 6px 6px;
+}

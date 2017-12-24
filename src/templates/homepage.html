@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block css %}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/style.css') }}" />
+{% endblock %}
+
+{% block main %}
+{% block body %}
+<h1 class="main-title" alt="Wikiloult" title="Wikiloult">
+  <div class="main-title-content">WikiloulT</div>
+  <strong class="main-title-slogan" data-jsl10n="slogan">L'encyclopédiw Loultiste</strong>
+</h1>
+
+<div class="central-wiki-wrapper">
+  <div class="logo-wrapper">
+    <a href="{{ url_for('index') }}">
+    <img class="logo" src="{{ url_for('static', filename='images/wikipedia_logo.png')}}">
+    </a>
+  </div>
+
+  <div class="central-wiki-elem elem1">
+    <a href="#yw" >
+      <strong>YW</strong>
+    </a>
+  </div>
+  <div class="central-wiki-elem elem2">
+    <a id="" href="#yela" >
+      <strong>Yé là</strong>
+    </a>
+  </div>
+  <div class="central-wiki-elem elem3">
+    <a id="" href="#ennw">
+      <strong>ennw</strong>
+    </a>
+  </div><div class="central-wiki-elem elem4">
+    <a id="" href="#chenipieds" >
+      <strong>Chenipieds</strong>
+    </a>
+  </div>
+
+  <div class="central-wiki-elem elem5">
+    <a id="" href="#snebwew" >
+      <strong>Snèbwèw</strong>
+    </a>
+  </div>
+
+  <div class="central-wiki-elem elem6">
+    <a id="" href="#dowmiw" >
+      <strong>dowmiw</strong>
+    </a>
+  </div>
+
+  <div class="central-wiki-elem elem7">
+    <a id="" href="#jtm">
+      <strong>Jtm</strong>
+    </a>
+
+  </div>
+  <div class="central-wiki-elem elem8">
+    <a id="" href="#mrle" >
+      <strong>Mrle</strong>
+    </a>
+
+  </div>
+  <div class="central-wiki-elem elem9">
+    <a id="tki" href="#tki" >
+      <strong>T KI</strong>
+    </a>
+  </div>
+  <div class="central-wiki-elem elem10">
+    <a id="mweton" href="#mweton" >
+      <strong>Mwe ton</strong>
+    </a>
+  </div>
+  <div class="search-container">
+    <form id="search-form" action="{{ url_for('search_page') }}">
+      <div class="search-input" id="search-input">
+        <input id="searchInput" name="search" size="20" autocomplete="off" type="search">
+        <button type="submit">Cherchéw</button>
+      </div>
+    </form>
+    </div>
+</div>
+    {% endblock %}
+{% endblock %}

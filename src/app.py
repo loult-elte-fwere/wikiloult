@@ -60,6 +60,11 @@ def page_not_found(e):
 @app.route("/")
 @autologin
 def home():
+    return render_template("homepage.html")
+
+@app.route("/index")
+@autologin
+def index():
     return render_template("index.html")
 
 
