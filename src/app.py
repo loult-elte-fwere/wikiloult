@@ -20,7 +20,6 @@ AUDIO_RENDER_FOLDER = join(dirname(realpath(__file__)), "static/sound/")
 
 
 app.config['SECRET_KEY'] = SECRET_KEY
-app.config['DEBUG'] = True
 
 app.config.from_envvar('DEV_SETTINGS', silent=True)
 
@@ -239,6 +238,7 @@ def last_edits():
     for result in results:
         result["raw_text"] = re.sub('<[^<]+?>', '', result["html_content"])
         result["last_editor"] = User(result["history"]["editor_cookie"])
+    results.reverse()
     return render_template("last_edited.html", results_list=results)
 
 @app.route("/random")
@@ -276,4 +276,5 @@ def main():
     app.run()
 
 if __name__ == "__main__":
+    app.config['DEBUG'] = True
     main()
