@@ -186,7 +186,9 @@ def page_create():
         if not title.strip() or not markdown_content.strip() or not page_name.strip():
             error_message = "Le nom de page, titre ou le contenu ne doivent être vides."
         elif not re.match("^[a-zA-Z_]*$", page_name):
-            error_message = "Le nom de la page ne doit contenir que des lettres et des tirets du bas"
+            error_message = "Le nom de la page ne doit contenir que des lettres et des tirets du bas."
+        elif page_cnctr.get_page_data(page_name) is not None:
+            error_message = "Une page portant ce nom existe déjà, changez le nom svp mr."
 
         if error_message is not None:
             return render_template("page_create.html",
