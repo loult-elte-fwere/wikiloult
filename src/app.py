@@ -223,8 +223,21 @@ def search_page():
     """Search for a wiki page"""
     search_query = request.args.get('query', '')
     page_cnctr = WikiPagesConnector()
-    return render_template("page_search.html", results_list=page_cnctr.search_pages(search_query))
+    results = page_cnctr.search_pages(search_query)
+    for result in results:
+        result["raw_text"] = re.sub('<[^<]+?>', '', result["html_content"])
+    return render_template("page_search.html", results_list=results)
 
+@app.route("/last_edits")
+@autologin
+def last_edits():
+    """Display pages that where last edited"""
+    page_cnctr = WikiPagesConnector()
+    results = page_cnctr.get_last_edited(10)
+    for result in results:
+        result["raw_text"] = re.sub('<[^<]+?>', '', result["html_content"])
+        result["last_editor"] = User(result["history"]["editor_cookie"])
+    return render_template("last_edited.html", results_list=results)
 
 @app.route("/random")
 @autologin
@@ -233,13 +246,6 @@ def random_page():
     page_cnctr = WikiPagesConnector()
     return redirect(url_for("page", page_name=page_cnctr.get_random_page()))
 
-
-@app.route("/last_edits")
-@autologin
-def last_edits():
-    """Display pages that where last edited"""
-    page_cnctr = WikiPagesConnector()
-    return render_template("last_edited.html", pages_list=page_cnctr.get_last_edited(10))
 
 #### routes for static pages
 

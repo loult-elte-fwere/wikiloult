@@ -1,5 +1,17 @@
 {% extends "base.html" %}
 
 {% block body %}
-<h1 style="text-align:center">Wpse. Y'a rien ici.</h1>
+    <h1 class="text-center">Derniers articles modifiés</h1>
+    <div class="list-group">
+    {% for result in results_list %}
+        <a href="{{ url_for('page', page_name=result._id) }}" class="list-group-item list-group-item-action flex-column align-items-start">
+            <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1">{{ result.title }}</h5>
+                <small>Dernière modif par {{ format_user(result.last_editor) }} le {{ result.last_edit.strftime('%d-%m-%Y') }}</small>
+            </div>
+            <p class="mb-1">{{ result.raw_text|truncate(300) }}</p>
+        </a>
+
+    {% endfor %}
+    </div>
 {% endblock %}

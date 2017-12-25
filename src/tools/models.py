@@ -102,6 +102,6 @@ class WikiPagesConnector(BaseConnector):
         return next(result)["_id"]
 
     def get_last_edited(self, number : int):
-        return  self.pages.aggregate([{"$unwind": "$history"},
-                                      {"$sort": {"history.edition_time": 1}},
-                                      {"$limit": number}])
+        return  list(self.pages.aggregate([{"$unwind": "$history"},
+                                           {"$sort": {"history.edition_time": 1}},
+                                           {"$limit": number}]))
