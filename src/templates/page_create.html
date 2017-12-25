@@ -21,18 +21,26 @@
         </div>
         <div class="form-group">
             <label for="content" class="control-label">Contenu</label>
-      <textarea class="form-control" id="content" name="content">
-        {{ page_content if page_content != None }}
-      </textarea>
+            <textarea class="form-control" id="content" name="content">{{ page_content if page_content != None }}</textarea>
         </div>
-        <button type="submit" class="btn btn-submit">Valider</button>
-        <button type="submit" class="btn btn-submit" name="preview">Aperçu</button>
-        {% if preview is defined %}
-            <hr/>
-            <h3>Aperçu de l'article</h3>
-            <div id="preview">
-                {{ preview | safe }}
+        <button type="submit" class="btn btn-primary">Valider</button>
+        <button type="submit" class="btn btn-primary" name="preview">Aperçu</button>
+        <p>
+            <button class="btn" type="button" data-toggle="collapse" data-target="#markdown-help" aria-expanded="false" aria-controls="markdown-help">
+                Aide au formatage
+            </button>
+        </p>
+        <div class="collapse" id="markdown-help">
+            <div class="card card-block">
+                {% include 'markdown.html' %}
             </div>
+        </div>
+        {% if preview is defined %}
+        <hr/>
+        <h3>Aperçu de l'article</h3>
+        <div id="preview">
+            {{ preview | safe }}
+        </div>
         {% endif %}
 </div>
 {% endblock %}

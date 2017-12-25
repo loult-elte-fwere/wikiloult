@@ -64,24 +64,23 @@
                   </div>
                   <button type="submit" class="btn btn-default">Rechercher</button>
               </form>
-            <h3>Wiki Loult</h3>
+            <h4>Le Wiki</h4>
             <ul class="list-group">
-              <li class="list-group-item"><a href="{{ url_for('home') }}">Accueil</a></li>
-              <li class="list-group-item"><a href="{{ url_for('rules') }}">Charte</a></li>
-              <li class="list-group-item"><a href="{{ url_for('faq') }}">F.A.Q</a></li>
-              <li class="list-group-item"><a href="#">Doume mou</a></li>
+                <li class="list-group-item"><a href="{{ url_for('home') }}">Accueil</a></li>
+                <li class="list-group-item"><a href="{{ url_for('random_page') }}">Article au Hasard</a></li>
+                <li class="list-group-item"><a href="{{ url_for('page_create') }}">Créer une Page</a></li>
+                <li class="list-group-item"><a href="{{ url_for('last_edits') }}">Dernières modifications</a></li>
             </ul>
-            <h3>Contenu</h3>
+            <h4>Informations</h4>
             <ul class="list-group">
-              <li class="list-group-item"><a href="{{ url_for('random_page') }}">Article au Hasard</a></li>
-              <li class="list-group-item"><a href="{{ url_for('page_create') }}">Créer une Page</a></li>
-              <li class="list-group-item"><a href="{{ url_for('history') }}">Histoire du Loult</a></li>
-              <li class="list-group-item"><a href="http://underfoule.xyz/loult/dico-louspeak.html">Dico du Loult</a></li>
+                <li class="list-group-item"><a href="{{ url_for('rules') }}">Charte</a></li>
+                <li class="list-group-item"><a href="{{ url_for('history') }}">Histoire du Loult</a></li>
+                <li class="list-group-item"><a href="{{ url_for('faq') }}">F.A.Q</a></li>
             </ul>
-            <h3>Edition</h3>
+            <h4>Liens externes</h4>
             <ul class="list-group">
-              <li class="list-group-item"><a href="{{ url_for('last_edits') }}">Dernières modifications</a></li>
-              <li class="list-group-item"><a href="#">Markdown</a></li>
+                <li class="list-group-item"><a href="https://loult.family/">Le Loult</a></li>
+                <li class="list-group-item"><a href="http://underfoule.xyz/loult/dico-louspeak.html">Dico du Loult</a></li>
             </ul>
           </div>
         </div>
@@ -91,7 +90,17 @@
           </main>
           </div>
         </div>
+        <div id="footer" class="row">
+            <div class="col-md-8 offset-md-2 card card-block">
+            <p class="text-center">Site créé par Scorplane et Electhor | Propulsé par Flask & Mongodb |
+                Pour se plaindre ou suggérer une fonctionalité sans doute essentielle à laquelle nous n'avions pas déjà pensé,
+                veuillez se référer au <a href="https://github.com/loult-elte-fwere/wikiloult/issues">bureau des réclamations</a>
+            </p>
+
+            </div>
+        </div>
     </div>
+
     {% endblock %}
       <!-- Optional JavaScript -->
       <!-- jQuery first, then Popper.js, then Bootstrap JS -->

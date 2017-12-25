@@ -14,7 +14,7 @@
 <div class="container">
     {% if page_data != None %}
         <audio>
-            <source src="{{ url_for('static', filename='sound/' + page_name + '.wav') }}"></source>
+            <source src="{{ url_for('static', filename='sound/' + {{ audio_filename }}) }}"></source>
         </audio>
         <h2 class="text-center" onmouseover="playclip();"> {{ page_data.title|title }} </h2>
         <div class="row">

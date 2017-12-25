@@ -108,7 +108,7 @@ def page(page_name):
     return render_template("wiki_page.html",
                            page_data=page_data,
                            page_name=page_name,
-                           tile_audio_filename=page_name + ".wav")
+                           audio_filename=page_name + ".wav")
 
 
 @app.route("/page/<page_name>/edit", methods=['GET', 'POST'])
