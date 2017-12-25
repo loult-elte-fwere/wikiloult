@@ -1,5 +1,25 @@
 {% extends "base.html" %}
 
 {% block body %}
-<p style="text-align:center">Ici va le contenu principal</p>
+<div class="row">
+    <div class="col-md-2">
+        <img src="{{ url_for('static',  filename='images/pokemon/large/' + user.poke_params.img + '.gif') }}">
+    </div>
+    <div class="col-md-10">
+        <h2 style="color: {{ user.poke_params.color }};">{{ user.poke_params.pokename + " " + user.poke_params.poke_adj }}</h2>
+    </div>
+    <div class="col-md-12">
+        <h4>Dernières modifications de cet utilisateur</h4>
+        <div class="list-group">
+        {% for edit in user_data.modifications %}
+            <a href="{{ url_for('page', page_name=edit.page) }}" class="list-group-item list-group-item-action flex-column align-items-start">
+                <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">{{ edit.page }}</h5>
+                    <small>Modif le {{ edit.date.strftime('%d-%m-%Y') }}</small>
+                </div>
+            </a>
+        {% endfor %}
+        </div>
+    </div>
+</div>
 {% endblock %}

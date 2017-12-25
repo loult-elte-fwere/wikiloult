@@ -214,7 +214,7 @@ def user_page(user_id):
     if user_data is None:
         abort(404)
 
-    return render_template("user_page.html", user_data=user_data)
+    return render_template("user_page.html", user_data=user_data, user=User(user_data["_id"]))
 
 
 @app.route("/search")

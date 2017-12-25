@@ -1,4 +1,7 @@
 {% macro format_user(user_obj) -%}
-    <img src="{{ url_for('static', filename='images/pokemon/' + user_obj.poke_params.img + '.gif') }}">
-    <span style="color: {{ user_obj.poke_params.color }};">{{ user_obj.poke_params.pokename + " " + user_obj.poke_params.poke_adj }}</span>
+    <img src="{{ url_for('static', filename='images/pokemon/small/' + user_obj.poke_params.img + '.gif') }}">
+    <a href="{{ url_for('user_page', user_id=user_obj.user_id) }}">
+        <span style="color: {{ user_obj.poke_params.color }};">{{ user_obj.poke_params.pokename + " " + user_obj.poke_params.poke_adj }}</span>
+    </a>
+
 {%- endmacro %}
