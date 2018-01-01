@@ -1,6 +1,20 @@
 {% extends "base.html" %}
 {% from 'macros.html' import format_user %}
 
+{% block custom_css %}
+<style>
+    @font-face {
+        font-family: 'pokefont';
+        src: url('{{ url_for('static', filename='fonts/pokemon_solid.ttf') }}');
+    }
+
+    #page-title {
+        font-family: pokefont;
+    }
+</style>
+
+{% endblock %}
+
 
 {% block headernav %}
 <ul class="list-inline">
@@ -16,7 +30,7 @@
         <audio>
             <source src="{{ url_for('static', filename='sound/' + audio_filename) }}"></source>
         </audio>
-        <h2 class="text-center" onmouseover="playclip();"> {{ page_data.title|title }} </h2>
+        <h2 class="text-center" id="page-title" onmouseover="playclip();"> {{ page_data.title|title }} </h2>
         <div class="row">
             <div class="col-md-9">
                 {{ page_data.html_content | safe }}
