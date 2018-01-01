@@ -5,7 +5,7 @@ from os.path import join, dirname, realpath
 from html import escape
 
 import flask_admin as admin
-from flask import Flask, render_template, session, redirect, url_for, request, abort
+from flask import Flask, render_template, session, redirect, url_for, request, abort, make_response
 from flask_login import LoginManager, login_required, login_user, current_user, logout_user
 
 from config import SECRET_KEY
@@ -61,11 +61,6 @@ def page_not_found(e):
 def home():
     return render_template("homepage.html")
 
-@app.route("/index")
-@autologin
-def index():
-    return render_template("index.html")
-
 
 @app.route("/login", methods=['GET', 'POST'])
 @autologin
@@ -95,7 +90,9 @@ def login():
 def logout():
     """Logout of the website : destroy session and delete the cookie"""
     logout_user()
-    return render_template("index.html")
+    resp = make_response(render_template("homepage.html"))
+    resp.set_cookie('id', '', expires=0)  # destroy the cookie by making it expire immediately
+    return resp
 
 
 @app.route("/page/<page_name>")
@@ -203,7 +200,6 @@ def page_create():
             pass
         audio_render(title, join(AUDIO_RENDER_FOLDER, page_name + ".wav"))
         return redirect(url_for("page", page_name=page_name))
-    return render_template("index.html")
 
 
 @app.route("/user/<user_id>")
@@ -216,6 +212,37 @@ def user_page(user_id):
         abort(404)
 
     return render_template("user_page.html", user_data=user_data, user=User(user_data["_id"]))
+
+@app.route("/user/edit", methods=['GET', 'POST'])
+@login_required
+@autologin
+def profile_edit():
+    user_cnctr = UsersConnector()
+    if request.method == "GET":
+        user_data = user_cnctr.get_user_data(current_user.user_id)
+        return render_template("user_profile_edit.html", profile_markdown=user_data["personal_text_markdown"])
+
+    elif request.method == "POST":
+        markdown_content = request.form["content"]
+
+        if request.form.get("preview", None) is not None:
+            markdown_renderer = WikiPageRenderer()
+            html_render = markdown_renderer.render(escape(markdown_content))
+            return render_template("user_profile_edit.html",
+                                   profile_markdown=markdown_content,
+                                   preview=html_render)
+
+        error_message = None
+        if not markdown_content.strip():
+            error_message = "Le contenu ne peut pas être vide wesh"
+
+        if error_message is not None:
+            return render_template("user_profile_edit.html",
+                                   profile_markdown=markdown_content,
+                                   message=error_message)
+
+        user_cnctr.update_user_text(current_user.cookie, markdown_content)
+        return redirect(url_for("user_page", user_id=current_user.user_id))
 
 
 @app.route("/search")

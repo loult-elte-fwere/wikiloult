@@ -1,5 +1,13 @@
 {% extends "base.html" %}
 
+{% block headernav %}
+    {% if current_user.is_authenticated %}
+        <ul class="list-inline">
+            <li class="list-inline-item"><a  href="{{ url_for('profile_edit') }}">Éditer votre profil</a></li>
+        </ul>
+    {% endif %}
+{% endblock %}
+
 {% block body %}
 <div class="row">
     <div class="col-md-2">
@@ -8,7 +16,15 @@
     <div class="col-md-10">
         <h2 style="color: {{ user.poke_params.color }};">{{ user.poke_params.pokename + " " + user.poke_params.poke_adj }}</h2>
     </div>
-    <div class="col-md-12">
+    <div class="col-md-7">
+        <h4>Description perso</h4>
+        {% if user_data.personal_text_html != None %}
+            {{ user_data.personal_text_html | safe }}
+        {% else %}
+            <p>Ben rienw pour l'instant désw.</p>
+        {% endif %}
+    </div>
+    <div class="col-md-5">
         <h4>Dernières modifications de cet utilisateur</h4>
         <div class="list-group">
         {% for edit in user_data.modifications %}
