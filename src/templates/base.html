@@ -67,15 +67,14 @@
             <h4>Le Wiki</h4>
             <ul class="list-group">
                 <li class="list-group-item"><a href="{{ url_for('home') }}">Accueil</a></li>
-                <li class="list-group-item"><a href="{{ url_for('random_page') }}">Article au Hasard</a></li>
                 <li class="list-group-item"><a href="{{ url_for('page_create') }}">Créer une Page</a></li>
                 <li class="list-group-item"><a href="{{ url_for('last_edits') }}">Dernières modifications</a></li>
+                <li class="list-group-item"><a href="{{ url_for('random_page') }}">Article au Hasard</a></li>
             </ul>
             <h4>Informations</h4>
             <ul class="list-group">
                 <li class="list-group-item"><a href="{{ url_for('rules') }}">Charte</a></li>
-                <li class="list-group-item"><a href="{{ url_for('history') }}">Histoire du Loult</a></li>
-                <li class="list-group-item"><a href="{{ url_for('faq') }}">F.A.Q</a></li>
+                <li class="list-group-item"><a href="{{ url_for('page', page_name='histoire') }}">Histoire du Loult</a></li>
             </ul>
             <h4>Liens externes</h4>
             <ul class="list-group">
