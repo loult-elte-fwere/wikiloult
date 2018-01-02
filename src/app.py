@@ -34,6 +34,7 @@ admin = admin.Admin(app, name='Wikiloult Admin', index_view=CheckCookieAdminView
 admin.add_view(UserView(UsersConnector().users, 'Users'))
 admin.add_view(PageView(WikiPagesConnector().pages, 'Pages'))
 
+
 @login_manager.user_loader
 def load_user(user_cookie):
     return User(user_cookie)
@@ -213,6 +214,7 @@ def user_page(user_id):
 
     return render_template("user_page.html", user_data=user_data, user=User(user_data["_id"]))
 
+
 @app.route("/user/edit", methods=['GET', 'POST'])
 @login_required
 @autologin
@@ -256,6 +258,7 @@ def search_page():
         result["raw_text"] = re.sub('<[^<]+?>', '', result["html_content"])
     return render_template("page_search.html", results_list=results)
 
+
 @app.route("/last_edits")
 @autologin
 def last_edits():
@@ -268,6 +271,7 @@ def last_edits():
     results.reverse()
     return render_template("last_edited.html", results_list=results)
 
+
 @app.route("/random")
 @autologin
 def random_page():
@@ -277,19 +281,6 @@ def random_page():
 
 
 #### routes for static pages
-
-@app.route("/history")
-@autologin
-def history():
-    """History of the loult website"""
-    return render_template("history.html")
-
-
-@app.route("/faq")
-@autologin
-def faq():
-    """FAQ of the wiki"""
-    return render_template("faq.html")
 
 
 @app.route("/rules")
