@@ -10,11 +10,12 @@
 
 {% block body %}
 <div class="row">
-    <div class="col-md-2">
-        <img src="{{ url_for('static',  filename='images/pokemon/large/' + user.poke_params.img + '.gif') }}">
-    </div>
-    <div class="col-md-10">
-        <h2 style="color: {{ user.poke_params.color }};">{{ user.poke_params.pokename + " " + user.poke_params.poke_adj }}</h2>
+  <div class="col-md-12">
+        <div class="text-center">
+            <img src="{{ url_for('static',  filename='images/pokemon/large/' + user.poke_params.img + '.gif') }}">
+            <h2 class="d-inline-block align-bottom" style="color: {{ user.poke_params.color }};">{{ user.poke_params.pokename + " " + user.poke_params.poke_adj }}</h2>
+        </div>
+        <hr/>
     </div>
     <div class="col-md-7">
         <h4>Description perso</h4>
