@@ -282,7 +282,7 @@ def last_edits():
             last_editor = page["history"]["editor_cookie"]
             last_page = page["_id"]
 
-    return render_template("last_edited.html", pages_list=last_edited_pages)
+    return render_template("last_edited.html", results_list=last_edited_pages)
 
 #### routes for static pages
 
