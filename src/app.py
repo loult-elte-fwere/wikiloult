@@ -2,15 +2,16 @@ import re
 from functools import wraps
 from os import makedirs
 from os.path import join, dirname, realpath
+from html import escape
 
 import flask_admin as admin
-from flask import Flask, render_template, session, redirect, url_for, request, abort
+from flask import Flask, render_template, session, redirect, url_for, request, abort, make_response
 from flask_login import LoginManager, login_required, login_user, current_user, logout_user
 
 from config import SECRET_KEY
 from tools.admin import UserView, PageView, CheckCookieAdminView
 from tools.models import UsersConnector, WikiPagesConnector
-from tools.rendering import audio_render
+from tools.rendering import audio_render, WikiPageRenderer
 from tools.users import User
 
 app = Flask(__name__)
@@ -19,7 +20,6 @@ AUDIO_RENDER_FOLDER = join(dirname(realpath(__file__)), "static/sound/")
 
 
 app.config['SECRET_KEY'] = SECRET_KEY
-app.config['DEBUG'] = True
 
 app.config.from_envvar('DEV_SETTINGS', silent=True)
 
@@ -33,6 +33,7 @@ login_manager.login_message = "Vous devez être connectés pour créer ou édite
 admin = admin.Admin(app, name='Wikiloult Admin', index_view=CheckCookieAdminView())
 admin.add_view(UserView(UsersConnector().users, 'Users'))
 admin.add_view(PageView(WikiPagesConnector().pages, 'Pages'))
+
 
 @login_manager.user_loader
 def load_user(user_cookie):
@@ -59,7 +60,7 @@ def page_not_found(e):
 @app.route("/")
 @autologin
 def home():
-    return render_template("index.html")
+    return render_template("homepage.html")
 
 
 @app.route("/login", methods=['GET', 'POST'])
@@ -90,7 +91,9 @@ def login():
 def logout():
     """Logout of the website : destroy session and delete the cookie"""
     logout_user()
-    return render_template("index.html")
+    resp = make_response(render_template("homepage.html"))
+    resp.set_cookie('id', '', expires=0)  # destroy the cookie by making it expire immediately
+    return resp
 
 
 @app.route("/page/<page_name>")
@@ -99,12 +102,10 @@ def page(page_name):
     """Display a wiki page"""
     page_cnctr = WikiPagesConnector()
     page_data = page_cnctr.get_page_data(page_name)
-    if page_data is None:
-        abort(404)
     return render_template("wiki_page.html",
                            page_data=page_data,
                            page_name=page_name,
-                           tile_audio_filename=page_name + ".wav")
+                           audio_filename=page_name + ".wav")
 
 
 @app.route("/page/<page_name>/edit", methods=['GET', 'POST'])
@@ -112,8 +113,6 @@ def page(page_name):
 @autologin
 def page_edit(page_name):
     """Page edition form"""
-    # TODO : faire une fonction preview aussi
-
     user_cnctr = UsersConnector()
     if not user_cnctr.is_allowed(current_user.cookie):
         return render_template("error.html", message="Vous n'êtes pas encore autorisés à éditer des pages")
@@ -122,14 +121,26 @@ def page_edit(page_name):
     if request.method == "GET":
         page_data = page_cnctr.get_page_data(page_name)
         return render_template("page_edit.html",
+                               page_name=page_name,
                                page_content=page_data["markdown_content"],
                                page_title=page_data["title"])
 
     elif request.method == "POST":
         title = request.form["title"]
         markdown_content = request.form["content"]
+
+        if request.form.get("preview", None) is not None:
+            markdown_renderer = WikiPageRenderer()
+            html_render = markdown_renderer.render(escape(markdown_content))
+            return render_template("page_edit.html",
+                                   page_name=page_name,
+                                   page_content=markdown_content,
+                                   page_title=title,
+                                   preview=html_render)
+
         if not title.strip() or not markdown_content.strip():
             return render_template("page_edit.html",
+                                   page_name=page_name,
                                    page_content=markdown_content,
                                    page_title=title,
                                    message="Le titre ni le contenu ne doivent être vides.")
@@ -145,25 +156,36 @@ def page_edit(page_name):
 @autologin
 def page_create():
     """Page creation form (almost the same as the page edition form"""
-    #  TODO : faire une fonction preview aussi
     user_cnctr = UsersConnector()
     if not user_cnctr.is_allowed(current_user.cookie):
         return render_template("error.html", message="Vous n'êtes pas encore autorisé à éditer des pages")
 
     page_cnctr = WikiPagesConnector()
     if request.method == "GET":
-        return render_template("page_create.html")
+        return render_template("page_create.html",
+                               page_name=request.args.get("page_name", None))
 
     elif request.method == "POST":
         page_name = request.form["name"]
         title = request.form["title"]
         markdown_content = request.form["content"]
 
+        if request.form.get("preview", None) is not None:
+            markdown_renderer = WikiPageRenderer()
+            html_render = markdown_renderer.render(escape(markdown_content))
+            return render_template("page_create.html",
+                                   page_content=markdown_content,
+                                   page_title=title,
+                                   page_name=page_name,
+                                   preview=html_render)
+
         error_message = None
         if not title.strip() or not markdown_content.strip() or not page_name.strip():
             error_message = "Le nom de page, titre ou le contenu ne doivent être vides."
         elif not re.match("^[a-zA-Z_]*$", page_name):
-            error_message = "Le nom de la page ne doit contenir que des lettres et des tirets du bas"
+            error_message = "Le nom de la page ne doit contenir que des lettres et des tirets du bas."
+        elif page_cnctr.get_page_data(page_name) is not None:
+            error_message = "Une page portant ce nom existe déjà, changez le nom svp mr."
 
         if error_message is not None:
             return render_template("page_create.html",
@@ -179,7 +201,6 @@ def page_create():
             pass
         audio_render(title, join(AUDIO_RENDER_FOLDER, page_name + ".wav"))
         return redirect(url_for("page", page_name=page_name))
-    return render_template("index.html")
 
 
 @app.route("/user/<user_id>")
@@ -191,7 +212,39 @@ def user_page(user_id):
     if user_data is None:
         abort(404)
 
-    return render_template("user_page.html", user_data=user_data)
+    return render_template("user_page.html", user_data=user_data, user=User(user_data["_id"]))
+
+
+@app.route("/user/edit", methods=['GET', 'POST'])
+@login_required
+@autologin
+def profile_edit():
+    user_cnctr = UsersConnector()
+    if request.method == "GET":
+        user_data = user_cnctr.get_user_data(current_user.user_id)
+        return render_template("user_profile_edit.html", profile_markdown=user_data["personal_text_markdown"])
+
+    elif request.method == "POST":
+        markdown_content = request.form["content"]
+
+        if request.form.get("preview", None) is not None:
+            markdown_renderer = WikiPageRenderer()
+            html_render = markdown_renderer.render(escape(markdown_content))
+            return render_template("user_profile_edit.html",
+                                   profile_markdown=markdown_content,
+                                   preview=html_render)
+
+        error_message = None
+        if not markdown_content.strip():
+            error_message = "Le contenu ne peut pas être vide wesh"
+
+        if error_message is not None:
+            return render_template("user_profile_edit.html",
+                                   profile_markdown=markdown_content,
+                                   message=error_message)
+
+        user_cnctr.update_user_text(current_user.cookie, markdown_content)
+        return redirect(url_for("user_page", user_id=current_user.user_id))
 
 
 @app.route("/search")
@@ -200,7 +253,10 @@ def search_page():
     """Search for a wiki page"""
     search_query = request.args.get('query', '')
     page_cnctr = WikiPagesConnector()
-    return render_template("page_search.html", results_list=page_cnctr.search_pages(search_query))
+    results = page_cnctr.search_pages(search_query)
+    for result in results:
+        result["raw_text"] = re.sub('<[^<]+?>', '', result["html_content"])
+    return render_template("page_search.html", results_list=results)
 
 
 @app.route("/random")
@@ -220,6 +276,8 @@ def last_edits():
     last_editor, last_page = None, None
     for page in page_cnctr.get_last_edited(30):
         if page["editor_cookie"] != last_editor and page["_id"] != last_page:
+            page["raw_text"] = re.sub('<[^<]+?>', '', page["html_content"])
+            page["last_editor"] = User(page["history"]["editor_cookie"])
             last_edited_pages.append(page)
             last_editor = page["editor_cookie"]
             last_page = page["_id"]
@@ -227,19 +285,6 @@ def last_edits():
     return render_template("last_edited.html", pages_list=last_edited_pages)
 
 #### routes for static pages
-
-@app.route("/history")
-@autologin
-def history():
-    """History of the loult website"""
-    return render_template("history.html")
-
-
-@app.route("/faq")
-@autologin
-def faq():
-    """FAQ of the wiki"""
-    return render_template("faq.html")
 
 
 @app.route("/rules")
@@ -253,4 +298,5 @@ def main():
     app.run()
 
 if __name__ == "__main__":
+    app.config['DEBUG'] = True
     main()

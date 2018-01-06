@@ -3,28 +3,48 @@
 {% block body %}
 {% if message is defined %}
 <div class="alert alert-warning">
-  {{ message }}
+    {{ message }}
 </div>
 {% endif %}
 
 <div class="container">
-  <h2>Nouvel article</h2>
-  <form method="post" action="{{ url_for('page_create') }}">
-    <div class="form-group">
-      <label for="name" class="control-label">Nom de la page (utilisé pour l'adresse de la page)</label>
-      <input type="text" class="form-control" id="name" name="name"
-             placeholder="Uniquement des lettres et tirets du bas. Exemple: a_sa_we"
-             value="{{ page_name if page_name is defined }}">
-      <label for="title" class="control-label">Titre</label>
-      <input type="text" class="form-control" id="title" name="title"
-             value="{{ page_title if page_title is defined }}">
-    </div>
-    <div class="form-group">
-      <label for="content" class="control-label">Contenu</label>
-      <textarea class="form-control" id="content" name="content">
-        {{ page_content if page_content != None }}
-      </textarea>
-    </div>
-    <button type="submit" class="btn btn-submit">Valider</button>
+    <h2>Nouvel article</h2>
+    <form method="post" action="{{ url_for('page_create') }}">
+        <div class="form-group">
+            <label for="name" class="control-label">Nom de la page (utilisé pour l'adresse de la page)</label>
+            <input type="text" class="form-control" id="name" name="name"
+                   placeholder="Uniquement des lettres et tirets du bas. Exemple: a_sa_we"
+                   value="{{ page_name if page_name != None }}">
+            <label for="title" class="control-label">Titre</label>
+            <input type="text" class="form-control" id="title" name="title"
+                   value="{{ page_title if page_title is defined }}">
+        </div>
+        <div class="form-group">
+            <label for="content" class="control-label">Contenu</label>
+            <textarea class="form-control" id="content" name="content">{{ page_content if page_content != None }}</textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Valider</button>
+        <button type="submit" class="btn btn-primary" name="preview">Aperçu</button>
+        <p>
+            <button class="btn" type="button" data-toggle="collapse" data-target="#markdown-help" aria-expanded="false" aria-controls="markdown-help">
+                Aide au formatage
+            </button>
+        </p>
+        <div class="collapse" id="markdown-help">
+            <div class="card card-block">
+                {% include 'markdown.html' %}
+            </div>
+        </div>
+        {% if preview is defined %}
+        <hr/>
+        <h3>Aperçu de l'article</h3>
+        <div id="preview">
+            {{ preview | safe }}
+        </div>
+        {% endif %}
 </div>
+{% endblock %}
+
+{% block custom_js %}
+<script src="{{ url_for('static', filename='js/edition.js') }}"></script>
 {% endblock %}

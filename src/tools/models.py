@@ -35,8 +35,8 @@ class UsersConnector(BaseConnector):
                          "short_id": user_obj.user_id,
                          "modifications": [],
                          "registration_date": datetime.datetime.utcnow(),
-                         "personal_text_raw": None,
-                         "personal_text_render": None}
+                         "personal_text_markdown": None,
+                         "personal_text_html": None}
         self.users.insert_one(new_user_data)
 
     def add_modification(self, user_cookie : str, page_name : str):
@@ -46,6 +46,13 @@ class UsersConnector(BaseConnector):
 
     def get_user_data(self, user_id: str):
         return self.users.find_one({"short_id": user_id})
+
+    def update_user_text(self, user_cookie: str, markdown_content : str):
+        markdown_renderer = WikiPageRenderer()
+        html_render = markdown_renderer.render(escape(markdown_content))
+        self.users.update_one({"_id": user_cookie},
+                              {"$set": {"personal_text_html": html_render,
+                                        "personal_text_markdown" : markdown_content}})
 
     def is_allowed(self, user_cookie: str) -> bool:
         """Looks up if a user is allowed to edit/create pages or not"""
@@ -63,8 +70,9 @@ class WikiPagesConnector(BaseConnector):
         markdown_renderer = WikiPageRenderer()
         page_render = markdown_renderer.render(escape(markdown_content))
         page_data = {"_id": page_name,
-                     "title": page_title,
+                     "title": escape(page_title),
                      "html_content": page_render,
+                     "markdown_content": markdown_content,
                      "history": [{"editor_cookie": editor_cookie,
                                   "markdown": markdown_content,
                                   "edition_time": datetime.datetime.utcnow()}],
@@ -81,11 +89,12 @@ class WikiPagesConnector(BaseConnector):
         self.pages.update_one({"_id": page_name},
                               {"$push": {"history": history_entry},
                                "$set": {"html_content": new_render,
-                                        "title": page_title,
+                                        "markdown_content" : markdown_content,
+                                        "title": escape(page_title),
                                         "last_edit": datetime.datetime.utcnow()}})
 
     def search_pages(self, search_query: str):
-        return self.pages.find({"$text": {"$search": search_query.lower()}})
+        return list(self.pages.find({"$text": {"$search": search_query.lower()}}))
 
     def get_page_data(self, page_name : str):
         page_data = self.pages.find_one({"_id": page_name})
@@ -106,6 +115,6 @@ class WikiPagesConnector(BaseConnector):
         return next(result)["_id"]
 
     def get_last_edited(self, number : int):
-        return  self.pages.aggregate([{"$unwind": "$history"},
-                                      {"$sort": {"history.edition_time": -1}},
-                                      {"$limit": number}])
+        return  list(self.pages.aggregate([{"$unwind": "$history"},
+                                           {"$sort": {"history.edition_time": -1}},
+                                           {"$limit": number}]))

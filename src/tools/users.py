@@ -32,6 +32,7 @@ class PokeParameters:
         self.poke_id = poke_id
         self.pokename = pokemons.pokemon[self.poke_id]
         self.poke_adj = adjectives[adj_id]
+        self.img = str(self.poke_id).zfill(3)
 
     @classmethod
     def from_cookie_hash(cls, cookie_hash):

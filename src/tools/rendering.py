@@ -4,7 +4,7 @@ import voxpopuli
 
 class WikiLinkRenderer(Renderer):
     def wiki_link(self, alt, link):
-        return '<a href="page/%s">%s</a>' % (link, alt)
+        return '<a href="/page/%s">%s</a>' % (link, alt)
 
 
 class WikiLinkInlineLexer(InlineLexer):
