@@ -275,11 +275,11 @@ def last_edits():
     last_edited_pages = []
     last_editor, last_page = None, None
     for page in page_cnctr.get_last_edited(30):
-        if page["editor_cookie"] != last_editor and page["_id"] != last_page:
+        if page["history"]["editor_cookie"] != last_editor and page["_id"] != last_page:
             page["raw_text"] = re.sub('<[^<]+?>', '', page["html_content"])
             page["last_editor"] = User(page["history"]["editor_cookie"])
             last_edited_pages.append(page)
-            last_editor = page["editor_cookie"]
+            last_editor = page["history"]["editor_cookie"]
             last_page = page["_id"]
 
     return render_template("last_edited.html", pages_list=last_edited_pages)
