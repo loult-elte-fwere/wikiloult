@@ -216,7 +216,15 @@ def random_page():
 def last_edits():
     """Display pages that where last edited"""
     page_cnctr = WikiPagesConnector()
-    return render_template("last_edited.html", pages_list=page_cnctr.get_last_edited(10))
+    last_edited_pages = []
+    last_editor, last_page = None, None
+    for page in page_cnctr.get_last_edited(30):
+        if page["editor_cookie"] != last_editor and page["_id"] != last_page:
+            last_edited_pages.append(page)
+            last_editor = page["editor_cookie"]
+            last_page = page["_id"]
+
+    return render_template("last_edited.html", pages_list=last_edited_pages)
 
 #### routes for static pages
 

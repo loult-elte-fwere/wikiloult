@@ -88,11 +88,17 @@ class WikiPagesConnector(BaseConnector):
         return self.pages.find({"$text": {"$search": search_query.lower()}})
 
     def get_page_data(self, page_name : str):
-        page_data = self.pages.find_one({"_id" : page_name})
+        page_data = self.pages.find_one({"_id": page_name})
         if page_data is None:
             return None
-        page_data["history"] = [{"editor" : User(entry["editor_cookie"]),
-                                 "edition_time": entry["edition_time"]} for entry in page_data["history"]]
+        condensed_history = []
+        prev_editor = None
+        for entry in page_data["history"]:
+            if prev_editor != entry["editor_cookie"]:
+                condensed_history.append({"editor": User(entry["editor_cookie"]),
+                                          "edition_time": entry["edition_time"]})
+                prev_editor = entry["editor_cookie"]
+        page_data["history"] = condensed_history[::-1]
         return page_data
 
     def get_random_page(self):
@@ -101,5 +107,5 @@ class WikiPagesConnector(BaseConnector):
 
     def get_last_edited(self, number : int):
         return  self.pages.aggregate([{"$unwind": "$history"},
-                                      {"$sort": {"history.edition_time": 1}},
+                                      {"$sort": {"history.edition_time": -1}},
                                       {"$limit": number}])
