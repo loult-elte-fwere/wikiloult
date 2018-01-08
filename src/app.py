@@ -115,7 +115,7 @@ def page_edit(page_name):
     """Page edition form"""
     user_cnctr = UsersConnector()
     if not user_cnctr.is_allowed(current_user.cookie):
-        return render_template("error.html", message="Vous n'êtes pas encore autorisés à éditer des pages")
+        return render_template("error.html", message="Vous n'êtes pas encore autorisé à éditer des pages")
 
     page_cnctr = WikiPagesConnector()
     if request.method == "GET":
