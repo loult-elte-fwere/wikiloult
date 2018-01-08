@@ -1,5 +1,6 @@
 import datetime
 from html import escape
+from collections import defaultdict
 
 from pymongo import MongoClient
 from config import DB_ADDRESS, USERS_COLLECTION_NAME, PAGES_COLLECTION_NAME
@@ -118,3 +119,10 @@ class WikiPagesConnector(BaseConnector):
         return  list(self.pages.aggregate([{"$unwind": "$history"},
                                            {"$sort": {"history.edition_time": -1}},
                                            {"$limit": number}]))
+
+    def get_all_pages_sorted(self):
+        query = self.pages.find().sort("title", 1)
+        per_first_letter = defaultdict(list)
+        for page_data in query:
+            per_first_letter[page_data["title"][0].lower()].append(page_data)
+        return per_first_letter

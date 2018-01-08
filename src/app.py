@@ -284,6 +284,12 @@ def last_edits():
 
     return render_template("last_edited.html", results_list=last_edited_pages)
 
+@app.route("/all")
+@autologin
+def all_pages():
+    page_cnctr = WikiPagesConnector()
+    return render_template("all_pages.html", pages_per_first_letter=page_cnctr.get_all_pages_sorted())
+
 #### routes for static pages
 
 
