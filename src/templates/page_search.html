@@ -10,7 +10,7 @@
                 <h5 class="mb-1">{{ result.title }}</h5>
                 <small>Dernière modif le {{ result.last_edit.strftime('%d-%m-%Y') }}</small>
             </div>
-            <p class="mb-1">{{ result.raw_text|truncate(300) }}</p>
+            <p class="mb-1">{{ result.raw_text|truncate(300)|safe }}</p>
         </a>
 
     {% endfor %}
