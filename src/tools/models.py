@@ -1,12 +1,13 @@
 import datetime
 from html import escape
-from collections import defaultdict
+from collections import OrderedDict
 
 from pymongo import MongoClient
 from config import DB_ADDRESS, USERS_COLLECTION_NAME, PAGES_COLLECTION_NAME
 
 from .users import User
 from .rendering import WikiPageRenderer
+
 
 
 class BaseConnector:
@@ -97,7 +98,7 @@ class WikiPagesConnector(BaseConnector):
     def search_pages(self, search_query: str):
         return list(self.pages.find({"$text": {"$search": search_query.lower()}}))
 
-    def get_page_data(self, page_name : str):
+    def get_page_data(self, page_name: str):
         page_data = self.pages.find_one({"_id": page_name})
         if page_data is None:
             return None
@@ -115,14 +116,17 @@ class WikiPagesConnector(BaseConnector):
         result = self.pages.aggregate([{"$sample": {"size": 1}}])
         return next(result)["_id"]
 
-    def get_last_edited(self, number : int):
-        return  list(self.pages.aggregate([{"$unwind": "$history"},
-                                           {"$sort": {"history.edition_time": -1}},
-                                           {"$limit": number}]))
+    def get_last_edited(self, number: int):
+        return list(self.pages.aggregate([{"$unwind": "$history"},
+                                          {"$sort": {"history.edition_time": -1}},
+                                          {"$limit": number}]))
 
     def get_all_pages_sorted(self):
         query = self.pages.find().sort("title", 1)
-        per_first_letter = defaultdict(list)
+        per_first_letter = OrderedDict()
         for page_data in query:
-            per_first_letter[page_data["title"][0].lower()].append(page_data)
+            first_letter = page_data["title"][0].lower()
+            if first_letter not in per_first_letter:
+                per_first_letter[first_letter] = []
+            per_first_letter[first_letter].append(page_data)
         return per_first_letter
