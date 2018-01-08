@@ -118,6 +118,9 @@ def page_edit(page_name):
         return render_template("error.html", message="Vous n'êtes pas encore autorisé à éditer des pages")
 
     page_cnctr = WikiPagesConnector()
+    if not page_cnctr.page_exists(page_name):
+        return render_template("error.html", message="Impossible d'éditer une page qui n'existe paw")
+
     if request.method == "GET":
         page_data = page_cnctr.get_page_data(page_name)
         return render_template("page_edit.html",

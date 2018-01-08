@@ -72,7 +72,7 @@ class WikiPagesConnector(BaseConnector):
         markdown_renderer = WikiPageRenderer()
         page_render = markdown_renderer.render(escape(markdown_content))
         page_data = {"_id": page_name,
-                     "title": escape(page_title),
+                     "title": page_title,
                      "html_content": page_render,
                      "markdown_content": markdown_content,
                      "history": [{"editor_cookie": editor_cookie,
@@ -92,8 +92,12 @@ class WikiPagesConnector(BaseConnector):
                               {"$push": {"history": history_entry},
                                "$set": {"html_content": new_render,
                                         "markdown_content" : markdown_content,
-                                        "title": escape(page_title),
+                                        "title": page_title,
                                         "last_edit": datetime.datetime.utcnow()}})
+
+    def page_exists(self, page_name: str) -> bool:
+        result = self.pages.find_one({"_id": page_name})
+        return result is not None
 
     def search_pages(self, search_query: str):
         return list(self.pages.find({"$text": {"$search": search_query.lower()}}))
