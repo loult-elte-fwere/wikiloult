@@ -15,7 +15,7 @@ class WikiloultRenderer(Renderer):
                     <source src="http://vocaroo.com/media_command.php?media=%s&amp;command=download_mp3" type="audio/mpeg">
                     <source src="http://vocaroo.com/media_command.php?media=%s&amp;command=download_webm" type="audio/webm">
                 </audio>
-                <a href="https?://vocaroo\.com/i/%s">[🔗]</a>
+                <a class="my-auto" href="https://vocaroo.com/i/%s">[🔗]</a>
             </div>''' % (vocaroo_id, vocaroo_id, vocaroo_id)
 
 
@@ -38,7 +38,7 @@ class WikiloultLexer(InlineLexer):
 
     def enable_vocaroo_link(self):
         # add wiki_link rules
-        self.rules.wiki_link = re.compile(
+        self.rules.vocaroo = re.compile(
             r'\[\['                   # [[
             r'https?://vocaroo\.com/i/([0-9A-Za-z]+)'   # https://vocaroo\.com/i/(vocaroo_id)
             r'\]\](?!\])'             # ]]
@@ -57,6 +57,7 @@ class WikiPageRenderer:
         wiki_link_renderer = WikiloultRenderer()
         link_lexer = WikiloultLexer(wiki_link_renderer)
         link_lexer.enable_wiki_link()
+        link_lexer.enable_vocaroo_link()
         self.renderer = Markdown(wiki_link_renderer, inline=link_lexer)
 
     def render(self, page_string : str):
