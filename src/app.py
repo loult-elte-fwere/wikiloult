@@ -214,7 +214,9 @@ def user_page(user_id):
     user_data = user_cnctr.get_user_data(user_id)
     if user_data is None:
         abort(404)
-
+    user_data["modifications"].reverse()
+    if len(user_data["modifications"]) > 15:
+        user_data["modifications"] = user_data["modifications"][:15]
     return render_template("user_page.html", user_data=user_data, user=User(user_data["_id"]))
 
 
