@@ -8,7 +8,7 @@ from flask_login import UserMixin
 
 
 with open(path.join(path.dirname(path.realpath(__file__)), "data/adjectifs.txt")) as adj_file:
-    adjectives = adj_file.read().split()
+    adjectives = adj_file.read().splitlines()
 
 
 class VoiceParameters:

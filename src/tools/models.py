@@ -1,6 +1,7 @@
 import datetime
 from html import escape
 from collections import OrderedDict
+import re
 
 from pymongo import MongoClient
 from config import DB_ADDRESS, USERS_COLLECTION_NAME, PAGES_COLLECTION_NAME
@@ -126,10 +127,17 @@ class WikiPagesConnector(BaseConnector):
                                           {"$limit": number}]))
 
     def get_all_pages_sorted(self):
+
+        def get_first_letter(text: str):
+            text = text.lower()
+            if text.startswith(("le", "la", "l'", "les")):
+                text = re.sub(r"^(le|l'|la|les)\s*", "", text)
+            return text[0]
+
         query = self.pages.find().sort("title", 1)
         per_first_letter = OrderedDict()
         for page_data in query:
-            first_letter = page_data["title"][0].lower()
+            first_letter = get_first_letter(page_data["title"])
             if first_letter not in per_first_letter:
                 per_first_letter[first_letter] = []
             per_first_letter[first_letter].append(page_data)
