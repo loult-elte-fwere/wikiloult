@@ -2,6 +2,7 @@ import datetime
 from html import escape
 from collections import OrderedDict
 import re
+import unicodedata
 
 from pymongo import MongoClient
 from config import DB_ADDRESS, USERS_COLLECTION_NAME, PAGES_COLLECTION_NAME
@@ -128,6 +129,10 @@ class WikiPagesConnector(BaseConnector):
 
     def get_all_pages_sorted(self):
 
+        def remove_accents(text):
+            return ''.join(c for c in unicodedata.normalize('NFD', text)
+                    if unicodedata.category(c) != 'Mn')
+
         def get_first_letter(text: str):
             text = text.lower()
             if text.startswith(("le", "la", "l'", "les")):
@@ -137,7 +142,7 @@ class WikiPagesConnector(BaseConnector):
         query = self.pages.find().sort("title", 1)
         per_first_letter = OrderedDict()
         for page_data in query:
-            first_letter = get_first_letter(page_data["title"])
+            first_letter = get_first_letter(remove_accents(page_data["title"]))
             if first_letter not in per_first_letter:
                 per_first_letter[first_letter] = []
             per_first_letter[first_letter].append(page_data)

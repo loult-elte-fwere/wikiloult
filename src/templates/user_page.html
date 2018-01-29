@@ -18,6 +18,12 @@
         <hr/>
     </div>
     <div class="col-md-7">
+        <div class="row">
+            <div class="col-md-4"><i class="fa fa-globe"></i> {{ user.poke_profile.city }} ({{ user.poke_profile.departement }})</div>
+            <div class="col-md-4"><i class="fa fa-transgender-alt"></i> {{ user.poke_profile.sex_orient }}</div>
+            <div class="col-md-4"><i class="fa fa-id-card"></i> {{ user.poke_profile.job }}</div>
+        </div>
+        <hr/>
         <h4>Description perso</h4>
         {% if user_data.personal_text_html != None %}
             {{ user_data.personal_text_html | safe }}
