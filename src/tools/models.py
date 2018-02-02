@@ -136,7 +136,7 @@ class WikiPagesConnector(BaseConnector):
         def get_first_letter(text: str):
             text = text.lower()
             if text.startswith(("le", "la", "l'", "les")):
-                text = re.sub(r"^(le|l'|la|les)\s*", "", text)
+                text = re.sub(r"^(le|l'|la|les)\s+", "", text)
             return text[0]
 
         query = self.pages.find().sort("title", 1)
