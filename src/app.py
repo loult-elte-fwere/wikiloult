@@ -115,9 +115,12 @@ def page_edit(page_name):
     """Page edition form"""
     user_cnctr = UsersConnector()
     if not user_cnctr.is_allowed(current_user.cookie):
-        return render_template("error.html", message="Vous n'êtes pas encore autorisés à éditer des pages")
+        return render_template("error.html", message="Vous n'êtes pas encore autorisé à éditer des pages")
 
     page_cnctr = WikiPagesConnector()
+    if not page_cnctr.page_exists(page_name):
+        return render_template("error.html", message="Impossible d'éditer une page qui n'existe paw")
+
     if request.method == "GET":
         page_data = page_cnctr.get_page_data(page_name)
         return render_template("page_edit.html",
@@ -211,7 +214,9 @@ def user_page(user_id):
     user_data = user_cnctr.get_user_data(user_id)
     if user_data is None:
         abort(404)
-
+    user_data["modifications"].reverse()
+    if len(user_data["modifications"]) > 15:
+        user_data["modifications"] = user_data["modifications"][:15]
     return render_template("user_page.html", user_data=user_data, user=User(user_data["_id"]))
 
 
@@ -259,19 +264,6 @@ def search_page():
     return render_template("page_search.html", results_list=results)
 
 
-@app.route("/last_edits")
-@autologin
-def last_edits():
-    """Display pages that where last edited"""
-    page_cnctr = WikiPagesConnector()
-    results = page_cnctr.get_last_edited(10)
-    for result in results:
-        result["raw_text"] = re.sub('<[^<]+?>', '', result["html_content"])
-        result["last_editor"] = User(result["history"]["editor_cookie"])
-    results.reverse()
-    return render_template("last_edited.html", results_list=results)
-
-
 @app.route("/random")
 @autologin
 def random_page():
@@ -279,6 +271,29 @@ def random_page():
     page_cnctr = WikiPagesConnector()
     return redirect(url_for("page", page_name=page_cnctr.get_random_page()))
 
+
+@app.route("/last_edits")
+@autologin
+def last_edits():
+    """Display pages that where last edited"""
+    page_cnctr = WikiPagesConnector()
+    last_edited_pages = []
+    last_editor, last_page = None, None
+    for page in page_cnctr.get_last_edited(30):
+        if page["history"]["editor_cookie"] != last_editor or page["_id"] != last_page:
+            page["raw_text"] = re.sub('<[^<]+?>', '', page["html_content"])
+            page["last_editor"] = User(page["history"]["editor_cookie"])
+            last_edited_pages.append(page)
+            last_editor = page["history"]["editor_cookie"]
+            last_page = page["_id"]
+
+    return render_template("last_edited.html", results_list=last_edited_pages)
+
+@app.route("/all")
+@autologin
+def all_pages():
+    page_cnctr = WikiPagesConnector()
+    return render_template("all_pages.html", pages_per_first_letter=page_cnctr.get_all_pages_sorted())
 
 #### routes for static pages
 
