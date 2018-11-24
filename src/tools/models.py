@@ -118,6 +118,18 @@ class WikiPagesConnector(BaseConnector):
         page_data["history"] = condensed_history[::-1]
         return page_data
 
+    def get_page_history(self, page_name : str):
+        page_data = self.pages.find_one({"_id": page_name})
+        if page_data is None:
+            return None
+
+        markdown_renderer = WikiPageRenderer()
+        for i, entry in enumerate(page_data["history"]):
+            entry["render"] = markdown_renderer.render(escape(entry["markdown"]))
+            entry["edit_id"] = i
+            entry["editor"] = User(entry["editor_cookie"])
+        return page_data["history"]
+
     def get_random_page(self):
         result = self.pages.aggregate([{"$sample": {"size": 1}}])
         return next(result)["_id"]

@@ -107,6 +107,15 @@ def page(page_name):
                            page_name=page_name,
                            audio_filename=page_name + ".wav")
 
+@app.route("/page/<page_name>/history")
+@autologin
+def page_history(page_name):
+    """Display a page's edit history"""
+    page_cnctr = WikiPagesConnector()
+    page_history = page_cnctr.get_page_history(page_name)
+    return render_template("page_history.html",
+                           page_history=reversed(page_history))
+
 
 @app.route("/page/<page_name>/edit", methods=['GET', 'POST'])
 @login_required
@@ -152,6 +161,32 @@ def page_edit(page_name):
         audio_render(title, join(AUDIO_RENDER_FOLDER, page_name + ".wav"))
         user_cnctr.add_modification(current_user.cookie, page_name)
         return redirect(url_for("page", page_name=page_name))
+
+@app.route("/restore")
+@login_required
+@autologin
+def page_restore():
+    """Display a page's edit history"""
+    if not current_user.is_admin:
+        abort(403)
+    page_name = request.args.get('page_name')
+    edit_id = int(request.args.get('edit_id'))
+    page_cnctr = WikiPagesConnector()
+    page_data = page_cnctr.get_page_data(page_name)
+    if page_data is None:
+        abort(500)
+
+    page_history = page_cnctr.get_page_history(page_name)
+    try:
+        selected_edit = page_history[edit_id]
+        page_cnctr.edit_page(page_name,
+                             selected_edit["markdown"],
+                             page_data["title"],
+                             current_user.get_id())
+    except IndexError:
+        abort(500)
+
+    return redirect(url_for("page", page_name=page_name))
 
 
 @app.route("/page/create", methods=['GET', 'POST'])

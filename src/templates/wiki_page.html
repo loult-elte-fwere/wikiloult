@@ -28,6 +28,7 @@
 <ul class="list-inline">
     {% if page_data != None %}
         <li class="list-inline-item"><a  href="{{ url_for('page_edit', page_name=page_name ) }}">Éditer</a></li>
+        <li class="list-inline-item"><a  href="{{ url_for('page_history', page_name=page_name ) }}">Historique</a></li>
     {% endif %}
 </ul>
 {% endblock %}

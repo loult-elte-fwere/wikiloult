@@ -1,4 +1,6 @@
 from os import path
+
+from config import ADMIN_COOKIES
 from .data import pokemons
 from colorsys import hsv_to_rgb
 from hashlib import md5
@@ -69,7 +71,6 @@ class PokeProfile:
                    (cookie_hash[2] | (cookie_hash[3] << 4)) % len(sexual_orient)) # sexual orientation
 
 
-
 class User(UserMixin):
 
     def __init__(self, cookie):
@@ -79,6 +80,7 @@ class User(UserMixin):
         self.poke_profile = PokeProfile.from_cookie_hash(cookie_hash)
         self.cookie = cookie
         self.user_id = cookie_hash.hex()[-16:]
+        self.is_admin = cookie in ADMIN_COOKIES
 
     def get_id(self):
         return self.cookie
