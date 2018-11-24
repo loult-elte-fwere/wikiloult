@@ -114,7 +114,8 @@ def page_history(page_name):
     page_cnctr = WikiPagesConnector()
     page_history = page_cnctr.get_page_history(page_name)
     return render_template("page_history.html",
-                           page_history=reversed(page_history))
+                           page_history=reversed(page_history),
+                           page_name=page_name)
 
 
 @app.route("/page/<page_name>/edit", methods=['GET', 'POST'])
@@ -179,14 +180,13 @@ def page_restore():
     page_history = page_cnctr.get_page_history(page_name)
     try:
         selected_edit = page_history[edit_id]
-        page_cnctr.edit_page(page_name,
-                             selected_edit["markdown"],
-                             page_data["title"],
-                             current_user.get_id())
     except IndexError:
         abort(500)
-
-    return redirect(url_for("page", page_name=page_name))
+    else:
+        return render_template("page_edit.html",
+                               page_name=page_name,
+                               page_content=selected_edit["markdown"],
+                               page_title=selected_edit["title"])
 
 
 @app.route("/page/create", methods=['GET', 'POST'])

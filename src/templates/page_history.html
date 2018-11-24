@@ -16,8 +16,11 @@
                 <div class="d-flex w-100 justify-content-between">
                     <h5 class="mb-1">Édition par {{ format_user(edit.editor) }},
                         le  {{ edit.edition_time.strftime('%d-%m-%Y') }}</h5>
+                    <p> {{ edit.title }} </p>
                 </div>
                 <div class="collapse" id="edit-content-{{ edit.edit_id }}">
+                    <h3> {{ edit.title }} </h3>
+
                     <p class="mb-1"> {{ edit.render | safe }} </p>
                     {% if current_user.is_admin %}
                         <a type="submit" class="btn btn-primary col-md-2"

@@ -89,7 +89,8 @@ class WikiPagesConnector(BaseConnector):
         new_render = markdown_renderer.render(escape(markdown_content))
         history_entry = {"editor_cookie": editor_cookie,
                          "markdown": markdown_content,
-                         "edition_time": datetime.datetime.utcnow()}
+                         "edition_time": datetime.datetime.utcnow(),
+                         "title" : page_title}
         self.pages.update_one({"_id": page_name},
                               {"$push": {"history": history_entry},
                                "$set": {"html_content": new_render,
@@ -124,7 +125,11 @@ class WikiPagesConnector(BaseConnector):
             return None
 
         markdown_renderer = WikiPageRenderer()
+        edit_title = page_data["title"]
         for i, entry in enumerate(page_data["history"]):
+            if "title" in entry:
+                edit_title = entry["title"]
+            entry["title"] = edit_title
             entry["render"] = markdown_renderer.render(escape(entry["markdown"]))
             entry["edit_id"] = i
             entry["editor"] = User(entry["editor_cookie"])
