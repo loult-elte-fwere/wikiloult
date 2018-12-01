@@ -34,11 +34,11 @@ class UserView(ModelView):
 class PageForm(form.Form):
     _id = fields.StringField("Page Name")
     title = fields.StringField("Title")
-    can_create = False
 
 class PageView(ModelView):
     column_list = ("_id", "title", "last_edit", "creation_date", "last_editor")
     form = PageForm
+    can_create = False
 
     def get_list(self, *args, **kwargs):
         """Mostly just to get the last editor"""
