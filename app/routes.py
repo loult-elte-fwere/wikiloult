@@ -1,6 +1,7 @@
 from app import app
 from .config import AUDIO_RENDER_FOLDER
 import flask_admin as admin
+from flask_admin.menu import MenuLink
 
 import re
 from functools import wraps
@@ -22,9 +23,10 @@ login_manager.login_view = "login"
 login_manager.login_message = "Vous devez être connectés pour créer ou éditer des pages"
 
 # Setting up flask-admin
-admin = admin.Admin(app, name='Wikiloult Admin', index_view=CheckCookieAdminView(), template_mode='bootstrap3')
-admin.add_view(UserView(UsersConnector().users, name='Users'))
-admin.add_view(PageView(WikiPagesConnector().pages, name='Pages'))
+admin = admin.Admin(app, name='Wikiloult Admin', index_view=CheckCookieAdminView(), template_mode='bootstrap3', url='/admin')
+admin.add_view(UserView(UsersConnector().users, name='Users', url='users'))
+admin.add_view(PageView(WikiPagesConnector().pages, name='Pages', url='pages'))
+admin.add_link(MenuLink(name='Public Home Page', url='/'))
 
 @login_manager.user_loader
 def load_user(user_cookie):

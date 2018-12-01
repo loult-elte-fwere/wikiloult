@@ -18,6 +18,7 @@ class UserForm(form.Form):
 class UserView(ModelView):
     column_list = ('poke_name', 'is_allowed', 'registration_date')
     column_sortable_list = ('is_allowed', 'registration_date')
+    can_create = False
 
     form = UserForm
 
@@ -33,6 +34,7 @@ class UserView(ModelView):
 class PageForm(form.Form):
     _id = fields.StringField("Page Name")
     title = fields.StringField("Title")
+    can_create = False
 
 class PageView(ModelView):
     column_list = ("_id", "title", "last_edit", "creation_date", "last_editor")
@@ -51,6 +53,10 @@ class PageView(ModelView):
 
 class CheckCookieAdminView(AdminIndexView):
 
+    # overriding the default behavior to make a view visible in the admin menu, as the returned template is currently blank
+    def is_visible(self):
+        return False
+
     @expose('/')
     def index(self):
         if not login.current_user.is_authenticated:
@@ -59,4 +65,5 @@ class CheckCookieAdminView(AdminIndexView):
         if login.current_user.cookie not in ADMIN_COOKIES:
             abort(403)
 
-        return super().index()
+#        return super().index()
+        return redirect(url_for('usersview.index_view'))
