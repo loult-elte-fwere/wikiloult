@@ -7,7 +7,7 @@ MONGO_HOST="127.0.0.1"
 MONGO_PORT="27017"
 TIMESTAMP=`date +%F-%H%M`
 MONGODUMP_PATH="/usr/bin/mongodump"
-BACKUPS_DIR="/home/hadware/db_backups/"
+BACKUPS_DIR="$HOME/db_backups/"
 BACKUP_NAME="$APP_NAME-$TIMESTAMP"
  
 $MONGODUMP_PATH -d $MONGO_DATABASE 
