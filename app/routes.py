@@ -1,27 +1,19 @@
+from app import app
+from .config import AUDIO_RENDER_FOLDER
+import flask_admin as admin
+
 import re
 from functools import wraps
 from os import makedirs
 from os.path import join, dirname, realpath
 from html import escape
 
-import flask_admin as admin
 from flask import Flask, render_template, session, redirect, url_for, request, abort, make_response
 from flask_login import LoginManager, login_required, login_user, current_user, logout_user
-
-from config import SECRET_KEY
 from tools.admin import UserView, PageView, CheckCookieAdminView
 from tools.models import UsersConnector, WikiPagesConnector
 from tools.rendering import audio_render, WikiPageRenderer
 from tools.users import User
-
-app = Flask(__name__)
-
-AUDIO_RENDER_FOLDER = join(dirname(realpath(__file__)), "static/sound/")
-
-
-app.config['SECRET_KEY'] = SECRET_KEY
-
-app.config.from_envvar('DEV_SETTINGS', silent=True)
 
 # flask-login
 login_manager = LoginManager()
@@ -30,10 +22,9 @@ login_manager.login_view = "login"
 login_manager.login_message = "Vous devez être connectés pour créer ou éditer des pages"
 
 # Setting up flask-admin
-admin = admin.Admin(app, name='Wikiloult Admin', index_view=CheckCookieAdminView())
-admin.add_view(UserView(UsersConnector().users, 'Users'))
-admin.add_view(PageView(WikiPagesConnector().pages, 'Pages'))
-
+admin = admin.Admin(app, name='Wikiloult Admin', index_view=CheckCookieAdminView(), template_mode='bootstrap3')
+admin.add_view(UserView(UsersConnector().users, name='Users'))
+admin.add_view(PageView(WikiPagesConnector().pages, name='Pages'))
 
 @login_manager.user_loader
 def load_user(user_cookie):
@@ -324,25 +315,17 @@ def last_edits():
 
     return render_template("last_edited.html", results_list=last_edited_pages)
 
+
 @app.route("/all")
 @autologin
 def all_pages():
     page_cnctr = WikiPagesConnector()
     return render_template("all_pages.html", pages_per_first_letter=page_cnctr.get_all_pages_sorted())
 
+
 #### routes for static pages
-
-
 @app.route("/rules")
 @autologin
 def rules():
     """Wiki rules"""
     return render_template("rules.html")
-
-
-def main():
-    app.run()
-
-if __name__ == "__main__":
-    app.config['DEBUG'] = True
-    main()
