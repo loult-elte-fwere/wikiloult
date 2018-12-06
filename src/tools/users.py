@@ -44,7 +44,7 @@ class PokeParameters:
         self.color = color
         self.poke_id = poke_id
         self.pokename = pokemons.pokemon[self.poke_id]
-        self.poke_adj = adjectives[adj_id]
+        self.poke_adj = adjectives[adj_id % len(adjectives)]
         self.img = str(self.poke_id).zfill(3)
 
     @classmethod
