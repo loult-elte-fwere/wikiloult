@@ -46,6 +46,7 @@
                   <a class="btn btn-info center" href="{{ url_for('logout') }}">
                     <span class="glyphicon glyphicon-log-in"></span>Déconnexion</a>
                   {% else %}
+		  <a class="btn btn-info center" href="{{ url_for('register') }}">Inscription</a>
                   <a class="btn btn-info center" href="{{ url_for('login') }}">
                     <span class="glyphicon glyphicon-log-in"></span>Connexion</a>
                   {% endif %}
