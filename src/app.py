@@ -6,6 +6,8 @@ from html import escape
 
 import flask_admin as admin
 from flask import Flask, render_template, session, redirect, url_for, request, abort, make_response
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 from flask_login import LoginManager, login_required, login_user, current_user, logout_user
 
 from config import SECRET_KEY
@@ -22,6 +24,11 @@ AUDIO_RENDER_FOLDER = join(dirname(realpath(__file__)), "static/sound/")
 app.config['SECRET_KEY'] = SECRET_KEY
 
 app.config.from_envvar('DEV_SETTINGS', silent=True)
+
+# limiter to temper with registration abuse
+registration_limiter = Limiter(
+    app,
+    key_func = get_remote_address)
 
 # flask-login
 login_manager = LoginManager()
@@ -75,15 +82,13 @@ def login():
         user_cnctr = UsersConnector()
 
         if not user_cnctr.user_exists(user_cookie):
-            user_cnctr.register_user(user_cookie)
-            message = """Votre compte utilisateur a été créé.
-            Un administrateur doit le valider pour que vous puissiez aussi éditer des pages."""
+            return redirect(url_for('register'))
         else:
             message = "Connectèw."
 
         login_user(User(user_cookie))
         return render_template("login.html", message=message)
-
+    
 
 @app.route("/logout")
 @login_required
@@ -94,6 +99,30 @@ def logout():
     resp = make_response(render_template("homepage.html"))
     resp.set_cookie('id', '', expires=0)  # destroy the cookie by making it expire immediately
     return resp
+
+
+@app.route("/register", methods=['GET','POST'])
+@autologin
+@registration_limiter.limit("1/day", error_message="Une inscription par jour.", exempt_when= lambda: request.method == 'GET')
+def register():
+    user_cnctr = UsersConnector()
+    if request.method == 'GET':
+        if user_cnctr.user_exists(request.cookies.get("id", None)):
+            message= "Connectèw."
+        else:
+            message=None
+        return render_template("register.html", base_template='base.html', message=message)
+    
+    elif request.method == 'POST':
+        user_cookie = request.form["user"]
+        if not user_cnctr.user_exists(user_cookie):
+            user_cnctr.register_user(user_cookie)
+            message = """Votre compte utilisateur a été créé.
+            Un administrateur doit le valider pour que vous puissiez aussi éditer des pages."""        
+        else:
+            message = "Connectèw."
+            login_user(User(user_cookie))
+        return render_template("register.html", message=message, base_template='base.html')
 
 
 @app.route("/page/<page_name>")
