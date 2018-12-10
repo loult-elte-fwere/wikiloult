@@ -63,6 +63,11 @@ def autologin(function):
 def page_not_found(e):
     return render_template('404.html'), 404
 
+@app.errorhandler(429)
+def ratelimit_handler(e):
+    return render_template('error.html',
+                           message="Trop de requêtes : Nombre limite d'inscription atteint"), 429
+
 
 @app.route("/")
 @autologin
