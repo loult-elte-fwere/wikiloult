@@ -2,5 +2,6 @@ flask
 flask-login
 flask-admin
 mistune
-pymongo
+mongoengine
 voxpopuli
+cookie-factory @ git+ssh://git@github.com/loult-elte-fwere/cookie-factory.git#egg=cookie_factory

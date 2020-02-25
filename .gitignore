@@ -110,4 +110,4 @@ ENV/
 .idea/
 
 #generated soundfiles
-src/static/sound/
+static/sound/
