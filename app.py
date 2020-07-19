@@ -20,7 +20,6 @@ app = Flask(__name__)
 
 AUDIO_RENDER_FOLDER = join(dirname(realpath(__file__)), "static/sound/")
 
-
 app.config['SECRET_KEY'] = SECRET_KEY
 
 app.config.from_envvar('DEV_SETTINGS', silent=True)
@@ -28,25 +27,10 @@ app.config.from_envvar('DEV_SETTINGS', silent=True)
 # limiter to temper with registration abuse
 registration_limiter = Limiter(
     app,
-    key_func = get_remote_address)
-
-# flask-login
-login_manager = LoginManager()
-login_manager.init_app(app)
-login_manager.login_view = "login"
-login_manager.login_message = "Vous devez être connectés pour créer ou éditer des pages"
-
-# Setting up flask-admin
-admin = admin.Admin(app, name='Wikiloult Admin', index_view=CheckCookieAdminView())
-admin.add_view(UserView(UsersConnector().users, 'Users'))
-admin.add_view(PageView(WikiPagesConnector().pages, 'Pages'))
+    key_func=get_remote_address)
 
 
-@login_manager.user_loader
-def load_user(user_cookie):
-    return User(user_cookie)
-
-
+# TODO : put this inside the base method view
 def autologin(function):
     @wraps(function)
     def with_login():
@@ -62,6 +46,7 @@ def autologin(function):
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('404.html'), 404
+
 
 @app.errorhandler(429)
 def ratelimit_handler(e):
@@ -93,7 +78,7 @@ def login():
 
         login_user(User(user_cookie))
         return render_template("login.html", message=message)
-    
+
 
 @app.route("/logout")
 @login_required
@@ -106,24 +91,25 @@ def logout():
     return resp
 
 
-@app.route("/register", methods=['GET','POST'])
+@app.route("/register", methods=['GET', 'POST'])
 @autologin
-@registration_limiter.limit("1/day", error_message="Une inscription par jour.", exempt_when= lambda: request.method == 'GET')
+@registration_limiter.limit("1/day", error_message="Une inscription par jour.",
+                            exempt_when=lambda: request.method == 'GET')
 def register():
     user_cnctr = UsersConnector()
     if request.method == 'GET':
         if user_cnctr.user_exists(request.cookies.get("id", None)):
-            message= "Connectèw."
+            message = "Connectèw."
         else:
-            message=None
+            message = None
         return render_template("register.html", base_template='base.html', message=message)
-    
+
     elif request.method == 'POST':
         user_cookie = request.form["user"]
         if not user_cnctr.user_exists(user_cookie):
             user_cnctr.register_user(user_cookie)
             message = """Votre compte utilisateur a été créé.
-            Un administrateur doit le valider pour que vous puissiez aussi éditer des pages."""        
+            Un administrateur doit le valider pour que vous puissiez aussi éditer des pages."""
         else:
             message = "Connectèw."
             login_user(User(user_cookie))
@@ -140,6 +126,7 @@ def page(page_name):
                            page_data=page_data,
                            page_name=page_name,
                            audio_filename=page_name + ".wav")
+
 
 @app.route("/page/<page_name>/history")
 @autologin
@@ -196,6 +183,7 @@ def page_edit(page_name):
         audio_render(title, join(AUDIO_RENDER_FOLDER, page_name + ".wav"))
         user_cnctr.add_modification(current_user.cookie, page_name)
         return redirect(url_for("page", page_name=page_name))
+
 
 @app.route("/restore")
 @login_required
@@ -358,11 +346,13 @@ def last_edits():
 
     return render_template("last_edited.html", results_list=last_edited_pages)
 
+
 @app.route("/all")
 @autologin
 def all_pages():
     page_cnctr = WikiPagesConnector()
     return render_template("all_pages.html", pages_per_first_letter=page_cnctr.get_all_pages_sorted())
+
 
 #### routes for static pages
 
@@ -376,6 +366,7 @@ def rules():
 
 def main():
     app.run()
+
 
 if __name__ == "__main__":
     app.config['DEBUG'] = True

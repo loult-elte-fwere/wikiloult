@@ -9,6 +9,15 @@ from config import DB_ADDRESS, USERS_COLLECTION_NAME, PAGES_COLLECTION_NAME
 
 from .users import User
 from .rendering import WikiPageRenderer
+from mongoengine import Document
+
+
+class User(Document):
+    pass
+
+
+class WikiPage(Document):
+    pass
 
 
 

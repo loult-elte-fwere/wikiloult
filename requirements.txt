@@ -1,6 +1,6 @@
 flask
 flask-login
-flask-admin
+flask-limiter
 mistune
 mongoengine
 voxpopuli

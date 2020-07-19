@@ -65,6 +65,7 @@ class WikiPageRenderer:
 
 
 def audio_render(text, render_path):
+    """Renders a text to the mwfe trademark voice"""
     voice = voxpopuli.Voice(lang="fr", voice_id=1, pitch=60, speed=110)
     text = text.replace('#', 'hashtag ')
     text = text.strip(' -"\'`$();:.')

@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block headernav %}
+    {% if current_user.is_authenticated %}
+        <ul class="list-inline">
+            <li class="list-inline-item"><a  href="{{ url_for('profile_edit') }}">Éditer votre profil</a></li>
+        </ul>
+    {% endif %}
+{% endblock %}
+
+{% block body %}
+<div class="row">
+  <div class="col-md-12">
+        <div class="text-center">
+            <img src="{{ url_for('static',  filename='images/pokemon/large/' + user.poke_params.img + '.gif') }}">
+            <h2 class="d-inline-block align-bottom" style="color: {{ user.poke_params.color }};">{{ user.poke_params.pokename + " " + user.poke_params.poke_adj }}</h2>
+        </div>
+        <hr/>
+    </div>
+    <div class="col-md-7">
+        <div class="row">
+            <div class="col-md-4"><i class="fa fa-globe"></i> {{ user.poke_profile.city }} ({{ user.poke_profile.departement }})</div>
+            <div class="col-md-4"><i class="fa fa-transgender-alt"></i> {{ user.poke_profile.sex_orient }}</div>
+            <div class="col-md-4"><i class="fa fa-id-card"></i> {{ user.poke_profile.job }}</div>
+        </div>
+        <hr/>
+        <h4>Description perso</h4>
+        {% if user_data.personal_text_html != None %}
+            {{ user_data.personal_text_html | safe }}
+        {% else %}
+            <p>Ben rienw pour l'instant désw.</p>
+        {% endif %}
+    </div>
+    <div class="col-md-5">
+        <h4>Dernières modifications de cet utilisateur</h4>
+        <div class="list-group">
+        {% for edit in user_data.modifications %}
+            <a href="{{ url_for('page', page_name=edit.page) }}" class="list-group-item list-group-item-action flex-column align-items-start">
+                <div class="d-flex w-100 justify-content-between">
+                    <h5 class="mb-1">{{ edit.page }}</h5>
+                    <small>Modif le {{ edit.date.strftime('%d-%m-%Y') }}</small>
+                </div>
+            </a>
+        {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
