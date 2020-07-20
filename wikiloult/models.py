@@ -1,24 +1,62 @@
-import datetime
+from datetime import datetime
 from html import escape
 from collections import OrderedDict
 import re
 import unicodedata
 
+from flask import current_app
+from flask_login import UserMixin, AnonymousUserMixin
 from pymongo import MongoClient
 from config import DB_ADDRESS, USERS_COLLECTION_NAME, PAGES_COLLECTION_NAME
+from cookie_factory import PokeParameters, PokeProfile, hash_cookie
 
-from .users import User
 from .rendering import WikiPageRenderer
-from mongoengine import Document
+from mongoengine import Document, StringField, BooleanField, EmbeddedDocument, ReferenceField, DateTimeField, ListField
 
 
-class User(Document):
-    pass
+class Modification(EmbeddedDocument):
+    page = ReferenceField('WikiPage')
+    date = DateTimeField(default=datetime.now)
+
+
+class User(Document, UserMixin):
+    cookie = StringField(primary_key=True)
+    is_allowed = BooleanField(default=False)
+    short_id = StringField(required=True)
+    poke_page = ReferenceField('WikiPage')
+
+    def get_id(self):
+        return self.cookie
+
+    @property
+    def poke_params(self) -> PokeParameters:
+        cookie_hash = hash_cookie(self.cookie, current_app.config['SALT'])
+        return PokeParameters.from_cookie_hash(cookie_hash)
+
+    @property
+    def poke_profile(self) -> PokeProfile:
+        cookie_hash = hash_cookie(self.cookie, current_app.config['SALT'])
+        return PokeProfile.from_cookie_hash(cookie_hash)
+
+
+class HistoryEntry(Document):
+    editor_cookie = ReferenceField(User)
+    markdown = StringField(required=True)
+    edition_time = DateTimeField(default=datetime.now)
 
 
 class WikiPage(Document):
-    pass
+    name = StringField(primary_key=True)
+    title = StringField(required=True)
+    html_content = StringField(required=True)
+    markdown_content = StringField(required=True)
+    history = ListField(ReferenceField(HistoryEntry))
+    last_edit = DateTimeField(default=datetime.now)
+    creation_time = DateTimeField(default=datetime.now)
 
+    @classmethod
+    def create_page(cls, name: str, title: str, markdown_content: str, editor_cookie: str):
+        pass
 
 
 class BaseConnector:
@@ -36,7 +74,7 @@ class UsersConnector(BaseConnector):
         super().__init__()
         self.users = self.db[USERS_COLLECTION_NAME]
 
-    def user_exists(self, user_cookie : str) -> bool:
+    def user_exists(self, user_cookie: str) -> bool:
         result = self.users.find_one({"_id": user_cookie})
         return result is not None
 
@@ -52,7 +90,7 @@ class UsersConnector(BaseConnector):
                          "personal_text_html": None}
         self.users.insert_one(new_user_data)
 
-    def add_modification(self, user_cookie : str, page_name : str):
+    def add_modification(self, user_cookie: str, page_name: str):
         self.users.update_one({"_id": user_cookie},
                               {"$push": {"modifications": {"page": page_name,
                                                            "date": datetime.datetime.utcnow()}}})
@@ -60,12 +98,12 @@ class UsersConnector(BaseConnector):
     def get_user_data(self, user_id: str):
         return self.users.find_one({"short_id": user_id})
 
-    def update_user_text(self, user_cookie: str, markdown_content : str):
+    def update_user_text(self, user_cookie: str, markdown_content: str):
         markdown_renderer = WikiPageRenderer()
         html_render = markdown_renderer.render(escape(markdown_content))
         self.users.update_one({"_id": user_cookie},
                               {"$set": {"personal_text_html": html_render,
-                                        "personal_text_markdown" : markdown_content}})
+                                        "personal_text_markdown": markdown_content}})
 
     def is_allowed(self, user_cookie: str) -> bool:
         """Looks up if a user is allowed to edit/create pages or not"""
@@ -79,7 +117,7 @@ class WikiPagesConnector(BaseConnector):
         super().__init__()
         self.pages = self.db[PAGES_COLLECTION_NAME]
 
-    def create_page(self, page_name : str, markdown_content: str, page_title: str, editor_cookie: str):
+    def create_page(self, page_name: str, markdown_content: str, page_title: str, editor_cookie: str):
         markdown_renderer = WikiPageRenderer()
         page_render = markdown_renderer.render(escape(markdown_content))
         page_data = {"_id": page_name,
@@ -99,11 +137,11 @@ class WikiPagesConnector(BaseConnector):
         history_entry = {"editor_cookie": editor_cookie,
                          "markdown": markdown_content,
                          "edition_time": datetime.datetime.utcnow(),
-                         "title" : page_title}
+                         "title": page_title}
         self.pages.update_one({"_id": page_name},
                               {"$push": {"history": history_entry},
                                "$set": {"html_content": new_render,
-                                        "markdown_content" : markdown_content,
+                                        "markdown_content": markdown_content,
                                         "title": page_title,
                                         "last_edit": datetime.datetime.utcnow()}})
 
@@ -128,7 +166,7 @@ class WikiPagesConnector(BaseConnector):
         page_data["history"] = condensed_history[::-1]
         return page_data
 
-    def get_page_history(self, page_name : str):
+    def get_page_history(self, page_name: str):
         page_data = self.pages.find_one({"_id": page_name})
         if page_data is None:
             return None
@@ -157,7 +195,7 @@ class WikiPagesConnector(BaseConnector):
 
         def remove_accents(text):
             return ''.join(c for c in unicodedata.normalize('NFD', text)
-                    if unicodedata.category(c) != 'Mn')
+                           if unicodedata.category(c) != 'Mn')
 
         def get_first_letter(text: str):
             text = text.lower()
