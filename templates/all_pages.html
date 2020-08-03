@@ -3,10 +3,10 @@
 {% block body %}
     <h1 class="text-center">Registre de toutes les pages</h1>
     {% for letter, pages in pages_per_first_letter.items() %}
-        <h3>{{ letter|upper }}</h3>
+        <h3>{{ letter|upper }}</h3>
         <ul>
         {% for page in pages %}
-            <li><a href="{{ url_for('page', page_name=page._id) }}">{{ page.title }}</a></li>
+            <li><a href="{{ url_for('page', page_name=page.name) }}">{{ page.title }}</a></li>
         {% endfor %}
         </ul>
     {% endfor %}

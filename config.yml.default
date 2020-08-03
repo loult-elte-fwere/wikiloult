@@ -1,0 +1,5 @@
+FLASK_CONFIG : prod
+SECRET_KEY : 13km
+SALT : we we we
+ADMIN_COOKIES :
+  - wiki

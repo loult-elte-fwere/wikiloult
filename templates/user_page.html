@@ -24,12 +24,6 @@
             <div class="col-md-4"><i class="fa fa-id-card"></i> {{ user.poke_profile.job }}</div>
         </div>
         <hr/>
-        <h4>Description perso</h4>
-        {% if user_data.personal_text_html != None %}
-            {{ user_data.personal_text_html | safe }}
-        {% else %}
-            <p>Ben rienw pour l'instant désw.</p>
-        {% endif %}
     </div>
     <div class="col-md-5">
         <h4>Dernières modifications de cet utilisateur</h4>

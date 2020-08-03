@@ -16,7 +16,6 @@ current_user: User
 
 # flask-login
 login_manager = LoginManager()
-login_manager.init_app(current_app)
 login_manager.login_view = "login"
 login_manager.login_message = "Vous devez être connectés pour créer ou éditer des pages"
 
@@ -40,8 +39,16 @@ class BaseMethodView(MethodView):
     def dispatch_request(self, *args, **kwargs):
         cookie = request.cookies.get("id", None)
         if cookie is not None:
-            login_user(User(cookie))
-        return super().dispatch_request(args, kwargs)
+            try:
+                user: User = User.objects.get(cookie=cookie)
+            except DoesNotExist:
+                pass
+            else:
+                login_user(user)
+        # try:
+        return super().dispatch_request(*args, **kwargs)
+        # except DoesNotExist:
+        #     abort(404)
 
 
 class SplashHomeView(BaseMethodView):
@@ -85,30 +92,44 @@ class LogoutView(BaseMethodView):
 
 
 class RegistrationView(BaseMethodView):
+    decorators = [registration_limiter.limit("1/day",
+                                             error_message="Une inscription par jour.")]
 
     def post(self):
         if current_user.is_authenticated:
-            redirect(url_for("home.html"))
-
-        user_cookie = request.form["user"]
-        try:
-            user = User.objects.get(cookie=user_cookie)
-        except DoesNotExist:
-            new_user = User.create_user(user_cookie)
-            new_user.save()
-            message = """Votre compte utilisateur a été créé.
-            Un administrateur doit le valider pour que vous puissiez aussi éditer des pages."""
+            message = "Vous êtes déjà connecté"
         else:
-            message = "Utilisateur déjà existant."
-            login_user(User(user_cookie))
-        return render_template("register.html", message=message, base_template='base.html')
+            user_cookie = request.form["user"]
+            try:
+                user = User.objects.get(cookie=user_cookie)
+            except DoesNotExist:
+                new_user = User.create_user(user_cookie)
+                new_user.save()
+                message = """Votre compte utilisateur a été créé.
+                Un administrateur doit le valider pour que vous puissiez aussi éditer des pages."""
+            else:
+                message = "Utilisateur déjà existant."
+                login_user(User(user_cookie))
+
+        return render_template("login.html", message=message, base_template='base.html')
+
+
+class UserPageView(BaseMethodView):
+    """Display a user's page"""
+
+    def get(self, user_id: str):
+        user: User = User.objects.get(shot_id=user_id)
+        return render_template("user_page.html", user=user)
 
 
 class PageView(BaseMethodView):
     """Display a wiki page"""
 
     def get(self, page_name: str):
-        page: WikiPage = WikiPage.objects.get(name=page_name)
+        try:
+            page: WikiPage = WikiPage.objects.get(name=page_name)
+        except DoesNotExist:
+            page = None
         return render_template("wiki_page.html", page=page)
 
 
@@ -131,7 +152,6 @@ class PageEditView(BaseMethodView):
         return render_template("page_edit.html", page=page)
 
     def post(self, page_name: str):
-        # TODO: check for possible refactoring of this
         title = request.form["title"]
         markdown_content = request.form["content"]
 
@@ -204,7 +224,7 @@ class PageCreateView(BaseMethodView):
             error_message = "Le nom de page, titre ou le contenu ne doivent être vides."
         elif not re.match("^[a-zA-Z_]*$", page_name):
             error_message = "Le nom de la page ne doit contenir que des lettres et des tirets du bas."
-        elif page_cnctr.get_page_data(page_name) is not None:
+        elif WikiPage.objects.get(name=page_name) is not None:
             error_message = "Une page portant ce nom existe déjà, changez le nom svp mr."
 
         if error_message is not None:
@@ -214,7 +234,7 @@ class PageCreateView(BaseMethodView):
                                    page_name=page_name,
                                    message=error_message)
 
-        WikiPage.create_page(page_name.lower(), title, markdown_content, current_user)s
+        WikiPage.create_page(page_name.lower(), title, markdown_content, current_user)
         current_app.config["AUDIO_RENDER_FOLDER"].mkdir(exist_ok=True, parents=True)
         new_wav_path = current_app.config["AUDIO_RENDER_FOLDER"] / Path(page_name + ".wav")
         audio_render(title, str(new_wav_path))
@@ -236,7 +256,7 @@ class RandomPageView(BaseMethodView):
     """Search for a wiki page"""
 
     def get(self):
-        return redirect(url_for("page", page_name=WikiPage.get_random_page().name))
+        return redirect(url_for("page", page_name=WikiPage.get_random_page()["_id"]))
 
 
 class LastEditsView(BaseMethodView):
@@ -274,6 +294,13 @@ class UserListView(BaseMethodView):
             return abort(403)
 
         if request.get("action") is not None:
-            pass # TODO
+            action = request.get("action")
+            short_id = request.get("userid")
+            user = User.objects(short_id=short_id)
+            if action == "allow":
+                user.is_allowed = True
+            elif action == "block":
+                user.is_allowed = False
+            user.save()
 
         return render_template("users_list.html", users=User.objects)

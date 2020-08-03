@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 
 from mongoengine import connect
-from dotenv import load_dotenv
+import yaml
 
 class BaseConfig:
     MONGODB_SETTINGS = {
@@ -34,7 +34,7 @@ class ProductionConfig(BaseConfig):
 
     # Db Settings
     MONGODB_SETTINGS = {
-        'db': 'wikiloult_prod',
+        'db': 'wikiloult',
         'host': '127.0.0.1',
         'port': 27017}
 
@@ -50,21 +50,25 @@ def get_config(flask_config=None):
      depending on the set FLASK_CONFIG environment variable.
     Falls back to ProductionConfig if none is found"""
     # the "passed argument" way supercedes everything.
-    if flask_config is not None:
-        config_cls = config_mapping[flask_config]
-    else:
+    if flask_config is None:
         # loading optional dotenv file. It won't override any existing env variables
-        load_dotenv(dotenv_path=Path(__file__).absolute().parent.parent / Path(".env"))
-        config_name = os.environ.get("FLASK_CONFIG")
-        config_cls = config_mapping.get(config_name, ProductionConfig)
+        config_filepath = Path(__file__).absolute().parent.parent / Path("config.yml")
+        if config_filepath.is_file():
+            with open(config_filepath) as yml_file:
+                config_dict = yaml.safe_load(yml_file)
+        else:
+            config_dict = None
+        if "FLASK_CONFIG" in config_dict:
+            flask_config = config_dict["FLASK_CONFIG"]
+    config_cls = config_mapping.get(flask_config, ProductionConfig)
 
     # if the config is for regular production, overloading default attributes
     # based on the env variables or the .env file variables
-    if config_cls is ProductionConfig:
+    if config_dict is not None:
         attributes = [att for att in dir(config_cls) if not att.startswith("__")]
         for attr in attributes:
-            if os.environ.get(attr) is not None:
-                setattr(config_cls, attr, os.environ.get(attr))
+            if attr in config_dict:
+                setattr(config_cls, attr, config_dict[attr])
 
     return config_cls
 

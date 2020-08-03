@@ -4,7 +4,7 @@
     <h1 class="text-center">Derniers articles modifiés</h1>
     <div class="list-group">
     {% for result in results_list %}
-        <a href="{{ url_for('page', page_name=result._id) }}" class="list-group-item list-group-item-action flex-column align-items-start">
+        <a href="{{ url_for('page', page_name=result.name) }}" class="list-group-item list-group-item-action flex-column align-items-start">
             <div class="d-flex w-100 justify-content-between">
                 <h5 class="mb-1">{{ result.title|title }}</h5>
                 <small>Modif par {{ format_user(result.last_editor, with_link=false) }} le {{ result.last_edit.strftime('%d-%m-%Y') }}</small>

@@ -3,126 +3,126 @@
 <!doctype html>
 
 <html>
-  <head>
+<head>
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     <!-- Bootstrap CSS -->
     {% block css %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/font-awesome.min.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/font-awesome.min.css') }}">
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     {% endblock %}
 
     {% block custom_css %}{% endblock %}
 
     <meta name="description" content="Le wiki du Loult" />
     {% block head %}
-    <title>Wiki Loult - {% block title %} Encyclopédie Loultiste{% endblock %}</title>
-    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
+        <title>Wiki Loult - {% block title %} Encyclopédie Loultiste{% endblock %}</title>
+        <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='images/favicon.ico') }}">
     {% endblock %}
 
-  </head>
-  <body>
-    {% block main %}
+</head>
+<body>
+{% block main %}
     <div class="container-fluid">
-      <div class="row">
-        <div class="col-md-2">
-          <a>
-            <img src="{{ url_for('static', filename='images/logo_wiki.svg') }}" alt="loult logo" />
-          </a>
-        </div>
-        <div class="col-md-10 right">
-          <nav class="navbar navbar-default">
-            <div class="container-fluid">
-              <div class="navbar navbar-header">
-              {% block headernav %}
-              {% endblock %}
-              </div>
-              <ul class="nav navbar-nav navbar-right">
-                <li>
-                  {% if current_user.is_authenticated %}
-                  {{ format_user(current_user) }}
-                  <a class="btn btn-info center" href="{{ url_for('logout') }}">
-                    <span class="glyphicon glyphicon-log-in"></span>Déconnexion</a>
-                  {% else %}
-		  <a class="btn btn-info center" href="{{ url_for('register') }}">Inscription</a>
-                  <a class="btn btn-info center" href="{{ url_for('login') }}">
-                    <span class="glyphicon glyphicon-log-in"></span>Connexion</a>
-                  {% endif %}
-                </li>
-              </ul>
+        <div class="row">
+            <div class="col-md-2">
+                <a>
+                    <img src="{{ url_for('static', filename='images/logo_wiki.svg') }}" alt="loult logo" />
+                </a>
             </div>
-          </nav>
+            <div class="col-md-10 right">
+                <nav class="navbar navbar-default">
+                    <div class="container-fluid">
+                        <div class="navbar navbar-header">
+                            {% block headernav %}
+                            {% endblock %}
+                        </div>
+                        <ul class="nav navbar-nav navbar-right">
+                            <li>
+                                {% if current_user.is_authenticated %}
+                                    {{ format_user(current_user) }}
+                                    <a class="btn btn-info center" href="{{ url_for('logout') }}">
+                                        <span class="glyphicon glyphicon-log-in"></span>Déconnexion</a>
+                                {% else %}
+                                    <a class="btn btn-info center" href="{{ url_for('login') }}">
+                                        <span class="glyphicon glyphicon-log-in"></span>Connexion/Inscription</a>
+                                {% endif %}
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
+            </div>
         </div>
-      </div>
-      <div class="row">
-        <div class="col-md-2">
-          <div>
-              <form method="get" action="{{ url_for('search_page') }}"
-                    class="form-inline row">
+        <div class="row">
+            <div class="col-md-2">
+                <div>
+                    <form method="get" action="{{ url_for('search_page') }}"
+                          class="form-inline row">
                 <span class="form-group">
                       <input type="search" class="form-control col-md-8 offset-md-1" id="search"
-                      name="query" placeholder="tunw tunw"/>
+                             name="query" placeholder="tunw tunw"/>
                     <button type="submit" class="btn btn-primary col-md-2">
                         <i class="fa fa-search" aria-hidden="true"></i>
                     </button>
                 </span>
-              </form>
-            <h4>Le Wiki</h4>
-            <div class="list-group">
-                <a class="list-group-item" href="{{ url_for('home') }}">Accueil</a>
-                <a class="list-group-item" href="{{ url_for('page_create') }}">Créer une Page</a>
-                <a class="list-group-item" href="{{ url_for('last_edits') }}">Dernières modifications</a>
-                <a class="list-group-item" href="{{ url_for('random_page') }}">Article au Hasard</a>
-                <a class="list-group-item" href="{{ url_for('all_pages') }}">Toutes les pages</a>
+                    </form>
+                    <h4>Le Wiki</h4>
+                    <div class="list-group">
+                        <a class="list-group-item" href="{{ url_for('home') }}">Accueil</a>
+                        <a class="list-group-item" href="{{ url_for('page_create') }}">Créer une Page</a>
+                        <a class="list-group-item" href="{{ url_for('last_edits') }}">Dernières modifications</a>
+                        <a class="list-group-item" href="{{ url_for('random_page') }}">Article au Hasard</a>
+                        <a class="list-group-item" href="{{ url_for('all_pages') }}">Toutes les pages</a>
+                    </div>
+                    <h4>Informations</h4>
+                    <div class="list-group">
+                        <a class="list-group-item" href="{{ url_for('rules') }}">Charte</a>
+                        <a class="list-group-item" href="{{ url_for('page', page_name='histoire') }}">Histoire du Loult</a>
+                    </div>
+                    <h4>Liens externes</h4>
+                    <div class="list-group">
+                        <a class="list-group-item" href="https://loult.family/">Le Loult</a>
+                        <a class="list-group-item" href="http://underfoule.xyz/loult/dico-louspeak.html">Dico du Loult</a>
+                    </div>
+                </div>
             </div>
-            <h4>Informations</h4>
-            <div class="list-group">
-                <a class="list-group-item" href="{{ url_for('rules') }}">Charte</a>
-                <a class="list-group-item" href="{{ url_for('page', page_name='histoire') }}">Histoire du Loult</a>
+            <div class="col-md-10">
+                <main>
+                    {% block body %}{% endblock %}
+                </main>
+                <hr/>
             </div>
-            <h4>Liens externes</h4>
-            <div class="list-group">
-                <a class="list-group-item" href="https://loult.family/">Le Loult</a>
-                <a class="list-group-item" href="http://underfoule.xyz/loult/dico-louspeak.html">Dico du Loult</a>
+            <div id="footer" class="col-md-10 offset-md-2 row">
+                <p class="text-center col-md-8 offset-md-2">Site créé par Scorplane et Electhor | Propulsé par Flask & Mongodb |
+                    Pour se plaindre ou suggérer une fonctionalité sans doute essentielle à laquelle nous n'avions pas déjà pensé,
+                    veuillez vous référer au <a href="https://github.com/loult-elte-fwere/wikiloult/issues">bureau des réclamations</a>
+                </p>
+                <div id="hall-of-fame">
+                    <img src="{{ url_for('static', filename='images/pokemon/small/271.gif') }}" title="Développement">
+                    <img src="{{ url_for('static', filename='images/pokemon/small/425.gif') }}" title="Développement">
+                    <img src="{{ url_for('static', filename='images/pokemon/small/183.gif') }}" title="Développement">
+                    <img src="{{ url_for('static', filename='images/pokemon/small/207.gif') }}" title="Développement">
+                    <img src="{{ url_for('static', filename='images/pokemon/small/156.gif') }}" title="Développement">
+                    <img src="{{ url_for('static', filename='images/pokemon/small/213.gif') }}" title="Graphisme">
+                    <img src="{{ url_for('static', filename='images/pokemon/small/145.gif') }}" title="Organisation">
+                    <img src="{{ url_for('static', filename='images/pokemon/small/120.gif') }}" title="Financement">
+                    <img src="{{ url_for('static', filename='images/pokemon/small/001.gif') }}" title="Financement">
+                    <img src="{{ url_for('static', filename='images/pokemon/small/007.gif') }}" title="Cohésion">
+                    <img src="{{ url_for('static', filename='images/pokemon/small/352.gif') }}" title="Graphisme">
+                </div>
             </div>
-          </div>
-        </div>
-        <div class="col-md-10">
-          <main>
-            {% block body %}{% endblock %}
-          </main>
-          <hr/>
-          </div>
-        <div id="footer" class="col-md-10 offset-md-2 row">
-            <p class="text-center col-md-8 offset-md-2">Site créé par Scorplane et Electhor | Propulsé par Flask & Mongodb |
-                Pour se plaindre ou suggérer une fonctionalité sans doute essentielle à laquelle nous n'avions pas déjà pensé,
-                veuillez vous référer au <a href="https://github.com/loult-elte-fwere/wikiloult/issues">bureau des réclamations</a>
-            </p>
-            <div id="hall-of-fame">
-                <img src="{{ url_for('static', filename='images/pokemon/small/271.gif') }}" title="Développement">
-                <img src="{{ url_for('static', filename='images/pokemon/small/425.gif') }}" title="Développement">
-                <img src="{{ url_for('static', filename='images/pokemon/small/183.gif') }}" title="Développement">
-                <img src="{{ url_for('static', filename='images/pokemon/small/207.gif') }}" title="Développement">
-                <img src="{{ url_for('static', filename='images/pokemon/small/156.gif') }}" title="Développement">
-                <img src="{{ url_for('static', filename='images/pokemon/small/213.gif') }}" title="Graphisme">
-                <img src="{{ url_for('static', filename='images/pokemon/small/145.gif') }}" title="Organisation">
-                <img src="{{ url_for('static', filename='images/pokemon/small/120.gif') }}" title="Financement">
-                <img src="{{ url_for('static', filename='images/pokemon/small/001.gif') }}" title="Financement">
-                <img src="{{ url_for('static', filename='images/pokemon/small/007.gif') }}" title="Cohésion">
-                <img src="{{ url_for('static', filename='images/pokemon/small/352.gif') }}" title="Graphisme">
-        </div>
-        </div>
         </div>
     </div>
 
-    {% endblock %}
-      <!-- Optional JavaScript -->
-      <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-      <script src="{{ url_for('static', filename='js/jquery-3.2.1.slim.min.js') }}"></script>
-      <script src="{{ url_for('static', filename='js/popper.min.js') }}"></script>
-      <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
-      {% block custom_js %}{% endblock %}
-  </body>
+{% endblock %}
+<!-- Optional JavaScript -->
+<!-- jQuery first, then Popper.js, then Bootstrap JS -->
+<script src="{{ url_for('static', filename='js/jquery-3.2.1.slim.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/popper.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+{% block custom_js %}{% endblock %}
+</body>
 </html>

@@ -20,13 +20,13 @@
 {% endblock %}
 
 {% block title %}
-{{ page_data.title }}
+{{ page.title }}
 {% endblock %}
 
 
 {% block headernav %}
 <ul class="list-inline">
-    {% if page_data != None %}
+    {% if page != None %}
         <li class="list-inline-item"><a  href="{{ url_for('page_edit', page_name=page.name ) }}">Éditer</a></li>
         <li class="list-inline-item"><a  href="{{ url_for('page_history', page_name=page.name ) }}">Historique</a></li>
     {% endif %}
@@ -37,12 +37,12 @@
 <div class="container">
     {% if page_data != None %}
         <audio>
-            <source src="{{ url_for('static', filename='sound/' + page.audio_filename, version=page_data.last_edit.timestamp()) }}"></source>
+            <source src="{{ url_for('static', filename='sound/' + page.audio_filename, version=page.last_edit.timestamp()) }}"></source>
         </audio>
-        <h2 class="text-center" id="page-title" onmouseover="playclip();"> {{ page_data.title|title }} </h2>
+        <h2 class="text-center" id="page-title" onmouseover="playclip();"> {{ page.title|title }} </h2>
         <div class="row">
             <div id="page-content" class="col-md-9">
-                {{ page_data.html_content | safe }}
+                {{ page.html_content | safe }}
             </div>
             <div class="col-md-3">
                 <div class="card">
@@ -50,7 +50,7 @@
                         <h4 class="card-title">Derniers éditeurs</h4>
                     </div>
                     <ul class="list-group list-group-flush">
-                        {% for edit in page_data.history %}
+                        {% for edit in page.history %}
                             <li class="list-group-item">{{ format_user(edit.editor) }}</li>
                         {% endfor %}
                     </ul>
@@ -60,7 +60,7 @@
     {% else %}
     <div class="alert alert-info">
         Aucun contenu rédigé pour cette page à ce jour. Vous pouvez
-        <a href="{{ url_for('page_create', page_name=page_name) }}">créer cette page</a>.
+        <a href="{{ url_for('page_create', page_name=page.name) }}">créer cette page</a>.
     </div>
     {% endif %}
 </div>
