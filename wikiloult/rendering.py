@@ -24,9 +24,9 @@ class WikiloultLexer(InlineLexer):
     def enable_wiki_link(self):
         # add wiki_link rules
         self.rules.wiki_link = re.compile(
-            r'\[\['                   # [[
-            r'([\s\S]+?\|[a-zA-Z0-9_]+?)'   # Page du wiki|page_name
-            r'\]\](?!\])'             # ]]
+            r'\[\['  # [[
+            r'([\s\S]+?\|[a-zA-Z0-9_]+?)'  # Page du wiki|page_name
+            r'\]\](?!\])'  # ]]
         )
 
         self.default_rules.insert(3, 'wiki_link')
@@ -39,9 +39,9 @@ class WikiloultLexer(InlineLexer):
     def enable_vocaroo_link(self):
         # add wiki_link rules
         self.rules.vocaroo = re.compile(
-            r'\[\['                   # [[
-            r'https?://vocaroo\.com/i/([0-9A-Za-z]+)'   # https://vocaroo\.com/i/(vocaroo_id)
-            r'\]\](?!\])'             # ]]
+            r'\[\['  # [[
+            r'https?://vocaroo\.com/i/([0-9A-Za-z]+)'  # https://vocaroo\.com/i/(vocaroo_id)
+            r'\]\](?!\])'  # ]]
         )
 
         self.default_rules.insert(3, 'vocaroo')
@@ -60,7 +60,7 @@ class WikiPageRenderer:
         link_lexer.enable_vocaroo_link()
         self.renderer = Markdown(wiki_link_renderer, inline=link_lexer)
 
-    def render(self, page_string : str):
+    def render(self, page_string: str):
         return self.renderer(page_string)
 
 
@@ -69,4 +69,4 @@ def audio_render(text, render_path):
     voice = voxpopuli.Voice(lang="fr", voice_id=1, pitch=60, speed=110)
     text = text.replace('#', 'hashtag ')
     text = text.strip(' -"\'`$();:.')
-    voice.to_audio(text, filename=render_path)
+    voice.to_audio(text, filename=str(render_path))

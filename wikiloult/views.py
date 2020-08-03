@@ -1,32 +1,53 @@
+from html import escape
+from pathlib import Path
+import re
+
+from flask import render_template, make_response, request, redirect, url_for, current_app, abort, jsonify
 from flask.views import MethodView
-from flask import Blueprint, render_template, make_response, request, redirect, url_for
-from flask_login import LoginManager, logout_user, current_user, login_user
-from .models import User
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+from flask_login import LoginManager, logout_user, current_user, login_user, login_required
+from mongoengine import DoesNotExist
+
+from .models import User, WikiPage, HistoryEntry
+from .rendering import WikiPageRenderer, audio_render
+
+current_user: User
 
 # flask-login
 login_manager = LoginManager()
-login_manager.init_app(app)
+login_manager.init_app(current_app)
 login_manager.login_view = "login"
 login_manager.login_message = "Vous devez être connectés pour créer ou éditer des pages"
 
+
 @login_manager.user_loader
 def load_user(user_cookie):
-    return User(user_cookie)
+    try:
+        return User.objects.get(cookie=user_cookie)
+    except DoesNotExist:
+        return None
+
 
 # limiter to temper with registration abuse
 registration_limiter = Limiter(
-    app,
+    current_app,
     key_func=get_remote_address)
 
 
 class BaseMethodView(MethodView):
 
-
     def dispatch_request(self, *args, **kwargs):
-        # TODO: take care of autologging here
-        pass
+        cookie = request.cookies.get("id", None)
+        if cookie is not None:
+            login_user(User(cookie))
+        return super().dispatch_request(args, kwargs)
+
+
+class SplashHomeView(BaseMethodView):
+
+    def get(self):
+        return render_template("homepage.html")
 
 
 class HomeView(BaseMethodView):
@@ -42,14 +63,14 @@ class LoginView(BaseMethodView):
 
     def post(self):
         user_cookie = request.form["user"]
-        user_cnctr = UsersConnector()
-
-        if not user_cnctr.user_exists(user_cookie):
+        try:
+            user = User.objects.get(cookie=user_cookie)
+        except DoesNotExist:
             return redirect(url_for('register'))
         else:
             message = "Connectèw."
 
-        login_user(User(user_cookie))
+        login_user(user)
         return render_template("login.html", message=message)
 
 
@@ -65,21 +86,20 @@ class LogoutView(BaseMethodView):
 
 class RegistrationView(BaseMethodView):
 
-    def get(self):
-        if user_cnctr.user_exists(request.cookies.get("id", None)):
-            message = "Connectèw."
-        else:
-            message = None
-        return render_template("register.html", base_template='base.html', message=message)
-
     def post(self):
+        if current_user.is_authenticated:
+            redirect(url_for("home.html"))
+
         user_cookie = request.form["user"]
-        if not user_cnctr.user_exists(user_cookie):
-            user_cnctr.register_user(user_cookie)
+        try:
+            user = User.objects.get(cookie=user_cookie)
+        except DoesNotExist:
+            new_user = User.create_user(user_cookie)
+            new_user.save()
             message = """Votre compte utilisateur a été créé.
             Un administrateur doit le valider pour que vous puissiez aussi éditer des pages."""
         else:
-            message = "Connectèw."
+            message = "Utilisateur déjà existant."
             login_user(User(user_cookie))
         return render_template("register.html", message=message, base_template='base.html')
 
@@ -88,40 +108,34 @@ class PageView(BaseMethodView):
     """Display a wiki page"""
 
     def get(self, page_name: str):
-        page_cnctr = WikiPagesConnector()
-        page_data = page_cnctr.get_page_data(page_name)
-        return render_template("wiki_page.html",
-                               page_data=page_data,
-                               page_name=page_name,
-                               audio_filename=page_name + ".wav")
+        page: WikiPage = WikiPage.objects.get(name=page_name)
+        return render_template("wiki_page.html", page=page)
 
 
 class PageHistoryView(BaseMethodView):
     """Display a page's edit history"""
 
     def get(self, page_name: str):
-        page_cnctr = WikiPagesConnector()
-        page_history = page_cnctr.get_page_history(page_name)
+        page: WikiPage = WikiPage.objects.get(name=page_name)
         return render_template("page_history.html",
-                               page_history=reversed(page_history),
+                               page_history=reversed(page.history),
                                page_name=page_name)
 
 
 class PageEditView(BaseMethodView):
     """Page edition form"""
+    decorators = [login_required]
 
     def get(self, page_name: str):
-        page_data = page_cnctr.get_page_data(page_name)
-        return render_template("page_edit.html",
-                               page_name=page_name,
-                               page_content=page_data["markdown_content"],
-                               page_title=page_data["title"])
+        page: WikiPage = WikiPage.objects.get(name=page_name)
+        return render_template("page_edit.html", page=page)
 
     def post(self, page_name: str):
         # TODO: check for possible refactoring of this
         title = request.form["title"]
         markdown_content = request.form["content"]
 
+        # if the user asked only for a preview, don't save and just render the page
         if request.form.get("preview", None) is not None:
             markdown_renderer = WikiPageRenderer()
             html_render = markdown_renderer.render(escape(markdown_content))
@@ -131,6 +145,7 @@ class PageEditView(BaseMethodView):
                                    page_title=title,
                                    preview=html_render)
 
+        # same if there's something missing
         if not title.strip() or not markdown_content.strip():
             return render_template("page_edit.html",
                                    page_name=page_name,
@@ -138,38 +153,33 @@ class PageEditView(BaseMethodView):
                                    page_title=title,
                                    message="Le titre ni le contenu ne doivent être vides.")
 
-        page_cnctr.edit_page(page_name, markdown_content, title, current_user.cookie)
-        audio_render(title, join(AUDIO_RENDER_FOLDER, page_name + ".wav"))
-        user_cnctr.add_modification(current_user.cookie, page_name)
+        # else, we just save
+        page: WikiPage = WikiPage.objects.get(name=page_name)
+        edit = page.edit(markdown_content, title, current_user)
+        audio_render(title, Path(current_app.config["AUDIO_RENDER_FOLDER"]) / Path(page_name + ".wav"))
+        current_user.edits.append(edit)
+        current_user.save()
         return redirect(url_for("page", page_name=page_name))
 
 
 class PageRestoreView(BaseMethodView):
     """Restore a page to a previous edit ID"""
+    decorators = [login_required]
 
     def get(self):
         if not current_user.is_admin:
             abort(403)
-        page_name = request.args.get('page_name')
-        edit_id = int(request.args.get('edit_id'))
-        page_cnctr = WikiPagesConnector()
-        page_data = page_cnctr.get_page_data(page_name)
-        if page_data is None:
-            abort(500)
 
-        page_history = page_cnctr.get_page_history(page_name)
-        try:
-            selected_edit = page_history[edit_id]
-        except IndexError:
-            abort(500)
-        else:
-            return render_template("page_edit.html",
-                                   page_name=page_name,
-                                   page_content=selected_edit["markdown"],
-                                   page_title=selected_edit["title"])
+        edit_id = int(request.args.get('edit_id'))
+        history_entry: HistoryEntry = HistoryEntry.objects.get(id=edit_id)
+        return render_template("page_edit.html",
+                               page_name=history_entry.page.name,
+                               page_content=history_entry.markdown,
+                               page_title=history_entry.title)
 
 
 class PageCreateView(BaseMethodView):
+    decorators = [login_required]
 
     def get(self):
         return render_template("page_create.html",
@@ -204,12 +214,10 @@ class PageCreateView(BaseMethodView):
                                    page_name=page_name,
                                    message=error_message)
 
-        page_cnctr.create_page(page_name.lower(), markdown_content, title, current_user.cookie)
-        try:
-            makedirs(AUDIO_RENDER_FOLDER)
-        except FileExistsError:
-            pass
-        audio_render(title, join(AUDIO_RENDER_FOLDER, page_name + ".wav"))
+        WikiPage.create_page(page_name.lower(), title, markdown_content, current_user)s
+        current_app.config["AUDIO_RENDER_FOLDER"].mkdir(exist_ok=True, parents=True)
+        new_wav_path = current_app.config["AUDIO_RENDER_FOLDER"] / Path(page_name + ".wav")
+        audio_render(title, str(new_wav_path))
         return redirect(url_for("page", page_name=page_name))
 
 
@@ -218,10 +226,9 @@ class SearchPageView(BaseMethodView):
 
     def get(self):
         search_query = request.args.get('query', '')
-        page_cnctr = WikiPagesConnector()
-        results = page_cnctr.search_pages(search_query)
+        results = list(WikiPage.objects.search_text(search_query))
         for result in results:
-            result["raw_text"] = re.sub('<[^<]+?>', '', result["html_content"])
+            result.raw_text = re.sub('<[^<]+?>', '', result.html_content)
         return render_template("page_search.html", results_list=results)
 
 
@@ -229,36 +236,44 @@ class RandomPageView(BaseMethodView):
     """Search for a wiki page"""
 
     def get(self):
-        page_cnctr = WikiPagesConnector()
-        return redirect(url_for("page", page_name=page_cnctr.get_random_page()))
+        return redirect(url_for("page", page_name=WikiPage.get_random_page().name))
 
 
 class LastEditsView(BaseMethodView):
     """Display pages that where last edited"""
 
     def get(self):
-        page_cnctr = WikiPagesConnector()
-        last_edited_pages = []
-        last_editor, last_page = None, None
-        for page in page_cnctr.get_last_edited(30):
-            if page["history"]["editor_cookie"] != last_editor or page["_id"] != last_page:
-                page["raw_text"] = re.sub('<[^<]+?>', '', page["html_content"])
-                page["last_editor"] = User(page["history"]["editor_cookie"])
-                last_edited_pages.append(page)
-                last_editor = page["history"]["editor_cookie"]
-                last_page = page["_id"]
-
+        last_edited_pages = HistoryEntry.get_last_edited_pages()
         return render_template("last_edited.html", results_list=last_edited_pages)
+
+
+class LastEditsJSONEndpoint(BaseMethodView):
+    """RESTful call to retrieve pages that where last edited"""
+
+    def get(self):
+        return jsonify(HistoryEntry.get_last_edited_pages())
 
 
 class AllPagesView(BaseMethodView):
 
     def get(self):
-        page_cnctr = WikiPagesConnector()
-        return render_template("all_pages.html", pages_per_first_letter=page_cnctr.get_all_pages_sorted())
+        return render_template("all_pages.html", pages_per_first_letter=WikiPage.get_all_pages_sorted())
 
 
 class RulesView(BaseMethodView):
 
     def get(self):
         return render_template("rules.html")
+
+
+class UserListView(BaseMethodView):
+    decorators = [login_required]
+
+    def get(self):
+        if not current_user.is_admin:
+            return abort(403)
+
+        if request.get("action") is not None:
+            pass # TODO
+
+        return render_template("users_list.html", users=User.objects)

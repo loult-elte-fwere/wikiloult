@@ -27,8 +27,8 @@
 {% block headernav %}
 <ul class="list-inline">
     {% if page_data != None %}
-        <li class="list-inline-item"><a  href="{{ url_for('page_edit', page_name=page_name ) }}">Éditer</a></li>
-        <li class="list-inline-item"><a  href="{{ url_for('page_history', page_name=page_name ) }}">Historique</a></li>
+        <li class="list-inline-item"><a  href="{{ url_for('page_edit', page_name=page.name ) }}">Éditer</a></li>
+        <li class="list-inline-item"><a  href="{{ url_for('page_history', page_name=page.name ) }}">Historique</a></li>
     {% endif %}
 </ul>
 {% endblock %}
@@ -37,7 +37,7 @@
 <div class="container">
     {% if page_data != None %}
         <audio>
-            <source src="{{ url_for('static', filename='sound/' + audio_filename, version=page_data.last_edit.timestamp()) }}"></source>
+            <source src="{{ url_for('static', filename='sound/' + page.audio_filename, version=page_data.last_edit.timestamp()) }}"></source>
         </audio>
         <h2 class="text-center" id="page-title" onmouseover="playclip();"> {{ page_data.title|title }} </h2>
         <div class="row">

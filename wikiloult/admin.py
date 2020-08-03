@@ -1,11 +1,10 @@
 from operator import itemgetter
 
-from flask_admin.contrib.pymongo import ModelView
+from flask_admin.contrib.mongoengine import ModelView
 from flask_admin import expose, AdminIndexView
 from wtforms import form, fields
 
 from config import ADMIN_COOKIES
-from tools.models import UsersConnector
 from .users import User
 import flask_login as login
 from flask import redirect, url_for, abort

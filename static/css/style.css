@@ -180,3 +180,7 @@ img {
     border: none;
     border-radius: 6px 6px;
 }
+
+#hall-of-fame {
+    display: flex;
+}
