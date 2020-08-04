@@ -1,9 +1,11 @@
 from flask import Flask
+from flask_cors import CORS
 
 from wikiloult.configs import get_config, set_up_db
 from wikiloult.views import *
 
 app = Flask(__name__)
+CORS(app)
 config = get_config()
 app.config.from_object(config)
 set_up_db(config)

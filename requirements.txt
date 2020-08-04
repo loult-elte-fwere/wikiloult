@@ -3,6 +3,7 @@ flask-login
 flask-limiter
 mistune
 PyYAML
+flask-cors
 mongoengine
 voxpopuli
 cookie-factory @ git+ssh://git@github.com/loult-elte-fwere/cookie-factory.git#egg=cookie_factory
