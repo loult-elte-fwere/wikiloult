@@ -21,7 +21,7 @@
         </div>
         <div class="form-group">
             <label for="content" class="control-label">Contenu</label>
-            <textarea class="form-control" id="content" name="content">{{ page_content if page_content != None }}</textarea>
+            <textarea class="form-control" rows="30" id="content" name="content">{{ page_content if page_content != None }}</textarea>
         </div>
         <button type="submit" class="btn btn-primary">Valider</button>
         <button type="submit" class="btn btn-primary" name="preview">Aperçu</button>
@@ -43,8 +43,4 @@
         </div>
         {% endif %}
 </div>
-{% endblock %}
-
-{% block custom_js %}
-<script src="{{ url_for('static', filename='js/edition.js') }}"></script>
 {% endblock %}

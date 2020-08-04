@@ -61,10 +61,6 @@
     line-height: 26em;
 }
 
-.logo-wrapper {
-    line-height: 31.2rem;
-    vertical-align: middle;
-}
 
 .central-wiki-elem {
     position:absolute;
@@ -155,6 +151,10 @@
     color: #fff;
     border: none;
     border-radius: 6px 6px;
+}
+
+#side-bar h4 {
+    margin-top: 0.6em;
 }
 
 #hall-of-fame {

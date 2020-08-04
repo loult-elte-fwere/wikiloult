@@ -58,16 +58,17 @@
         </div>
         <div class="row">
             <div class="col-md-2">
-                <div>
+                <div id="side-bar">
                     <form method="get" action="{{ url_for('search_page') }}"
-                          class="form-inline row">
-                <span class="form-group">
-                      <input type="search" class="form-control col-md-8 offset-md-1" id="search"
-                             name="query" placeholder="tunw tunw"/>
-                    <button type="submit" class="btn btn-primary col-md-2">
-                        <i class="fa fa-search" aria-hidden="true"></i>
-                    </button>
-                </span>
+                          class="form-inline row"
+                          id="page-search-form">
+                        <span class="form-group">
+                              <input type="search" class="form-control col-md-8 offset-md-1" id="search"
+                                     name="query" placeholder="tunw tunw"/>
+                            <button type="submit" class="btn btn-primary col-md-2">
+                                <i class="fa fa-search" aria-hidden="true"></i>
+                            </button>
+                        </span>
                     </form>
                     <h4>Le Wiki</h4>
                     <div class="list-group">
@@ -76,6 +77,9 @@
                         <a class="list-group-item" href="{{ url_for('last_edits') }}">Dernières modifications</a>
                         <a class="list-group-item" href="{{ url_for('random_page') }}">Article au Hasard</a>
                         <a class="list-group-item" href="{{ url_for('all_pages') }}">Toutes les pages</a>
+                        {% if current_user.is_admin %}
+                            <a class="list-group-item" href="{{ url_for('users_list') }}">Utilisateurs</a>
+                        {% endif %}
                     </div>
                     <h4>Informations</h4>
                     <div class="list-group">

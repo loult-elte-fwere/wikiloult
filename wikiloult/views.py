@@ -7,7 +7,7 @@ from flask.views import MethodView
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_login import LoginManager, logout_user, current_user, login_user, login_required
-from mongoengine import DoesNotExist
+from mongoengine import DoesNotExist, Q
 
 from .models import User, WikiPage, HistoryEntry
 from .rendering import WikiPageRenderer, audio_render
@@ -29,9 +29,7 @@ def load_user(user_cookie):
 
 
 # limiter to temper with registration abuse
-registration_limiter = Limiter(
-    current_app,
-    key_func=get_remote_address)
+registration_limiter = Limiter(key_func=get_remote_address)
 
 
 class BaseMethodView(MethodView):
@@ -93,7 +91,8 @@ class LogoutView(BaseMethodView):
 
 class RegistrationView(BaseMethodView):
     decorators = [registration_limiter.limit("1/day",
-                                             error_message="Une inscription par jour.")]
+                                             error_message="Une inscription par jour.",
+                                             methods=["POST"])]
 
     def post(self):
         if current_user.is_authenticated:
@@ -109,7 +108,7 @@ class RegistrationView(BaseMethodView):
                 Un administrateur doit le valider pour que vous puissiez aussi éditer des pages."""
             else:
                 message = "Utilisateur déjà existant."
-                login_user(User(user_cookie))
+                login_user(user)
 
         return render_template("login.html", message=message, base_template='base.html')
 
@@ -118,7 +117,7 @@ class UserPageView(BaseMethodView):
     """Display a user's page"""
 
     def get(self, user_id: str):
-        user: User = User.objects.get(shot_id=user_id)
+        user: User = User.objects.get(short_id=user_id)
         return render_template("user_page.html", user=user)
 
 
@@ -130,7 +129,7 @@ class PageView(BaseMethodView):
             page: WikiPage = WikiPage.objects.get(name=page_name)
         except DoesNotExist:
             page = None
-        return render_template("wiki_page.html", page=page)
+        return render_template("wiki_page.html", page=page, page_name=page_name)
 
 
 class PageHistoryView(BaseMethodView):
@@ -190,7 +189,7 @@ class PageRestoreView(BaseMethodView):
         if not current_user.is_admin:
             abort(403)
 
-        edit_id = int(request.args.get('edit_id'))
+        edit_id = request.args.get('edit_id')
         history_entry: HistoryEntry = HistoryEntry.objects.get(id=edit_id)
         return render_template("page_edit.html",
                                page_name=history_entry.page.name,
@@ -224,7 +223,7 @@ class PageCreateView(BaseMethodView):
             error_message = "Le nom de page, titre ou le contenu ne doivent être vides."
         elif not re.match("^[a-zA-Z_]*$", page_name):
             error_message = "Le nom de la page ne doit contenir que des lettres et des tirets du bas."
-        elif WikiPage.objects.get(name=page_name) is not None:
+        elif WikiPage.objects(name=page_name):
             error_message = "Une page portant ce nom existe déjà, changez le nom svp mr."
 
         if error_message is not None:
@@ -234,7 +233,8 @@ class PageCreateView(BaseMethodView):
                                    page_name=page_name,
                                    message=error_message)
 
-        WikiPage.create_page(page_name.lower(), title, markdown_content, current_user)
+        WikiPage.create_page(page_name.lower(), title, markdown_content,
+                             current_user._get_current_object())
         current_app.config["AUDIO_RENDER_FOLDER"].mkdir(exist_ok=True, parents=True)
         new_wav_path = current_app.config["AUDIO_RENDER_FOLDER"] / Path(page_name + ".wav")
         audio_render(title, str(new_wav_path))
@@ -247,8 +247,6 @@ class SearchPageView(BaseMethodView):
     def get(self):
         search_query = request.args.get('query', '')
         results = list(WikiPage.objects.search_text(search_query))
-        for result in results:
-            result.raw_text = re.sub('<[^<]+?>', '', result.html_content)
         return render_template("page_search.html", results_list=results)
 
 
@@ -267,11 +265,27 @@ class LastEditsView(BaseMethodView):
         return render_template("last_edited.html", results_list=last_edited_pages)
 
 
-class LastEditsJSONEndpoint(BaseMethodView):
+class LastEditsAPIEndpoint(BaseMethodView):
     """RESTful call to retrieve pages that where last edited"""
 
     def get(self):
-        return jsonify(HistoryEntry.get_last_edited_pages())
+        last_edits = HistoryEntry.get_last_edited_pages()
+        if len(last_edits) > 5:
+            last_edits = last_edits[:5]
+        history = [
+            {
+                "title": page.title,
+                "name": page.name,
+                "time": page.last_edit.date(),
+                "editor": {
+                    "fullname": page.last_editor.poke_params.fullname,
+                    "img_id": page.last_editor.poke_params.img_id,
+                    "color": page.last_editor.poke_params.color
+                }
+            }
+            for page in last_edits
+        ]
+        return jsonify(history)
 
 
 class AllPagesView(BaseMethodView):
@@ -286,21 +300,34 @@ class RulesView(BaseMethodView):
         return render_template("rules.html")
 
 
-class UserListView(BaseMethodView):
+class UsersListView(BaseMethodView):
     decorators = [login_required]
+
+    def post(self):
+        if not current_user.is_admin:
+            return abort(403)
+
+        if request.args.get("action") == "register":
+            new_user = User.create_user(request.form.get("user"))
+            new_user.save()
+
+        return render_template("users_list.html", users=User.objects)
 
     def get(self):
         if not current_user.is_admin:
             return abort(403)
 
-        if request.get("action") is not None:
-            action = request.get("action")
-            short_id = request.get("userid")
-            user = User.objects(short_id=short_id)
+        action = request.args.get("action")
+        if action in ["allow", "block"]:
+            short_id = request.args.get("userid")
+            user = User.objects.get(short_id=short_id)
             if action == "allow":
                 user.is_allowed = True
             elif action == "block":
                 user.is_allowed = False
             user.save()
+
+        elif action == "clear_idle":
+            User.objects(Q(is_allowed=False) & (Q(edits__size=0) | Q(edits__exists=False))).delete()
 
         return render_template("users_list.html", users=User.objects)

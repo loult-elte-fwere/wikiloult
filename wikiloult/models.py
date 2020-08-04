@@ -59,10 +59,10 @@ class HistoryEntry(Document):
         return WikiPageRenderer().render(escape(self.markdown))
 
     @classmethod
-    def get_last_edited_pages(cls):
+    def get_last_edited_pages(cls, limit=30) -> List['WikiPage']:
         last_edited_pages = []
         last_editor, last_page = None, None
-        for history_entry in cls.objects().order_by("-edition_time")[:30]:
+        for history_entry in cls.objects().order_by("-edition_time")[:limit]:
             if history_entry.editor != last_editor or history_entry.page != last_page:
                 page = history_entry.page
                 page.last_editor = history_entry.editor
@@ -113,6 +113,16 @@ class WikiPage(Document):
     @property
     def raw_text(self):
         return re.sub('<[^<]+?>', '', self.html_content)
+
+    @property
+    def squashed_history(self):
+        last_editor = None
+        history = []
+        for entry in self.history:
+            if last_editor != entry.editor:
+                history.append(entry)
+                last_editor = entry.editor
+        return list(reversed(history))
 
     def edit(self, markdown_content: str, page_title: str, editor: User):
         markdown_renderer = WikiPageRenderer()

@@ -1,18 +1,10 @@
 {% extends "base.html" %}
 
-{% block headernav %}
-    {% if current_user.is_authenticated %}
-        <ul class="list-inline">
-            <li class="list-inline-item"><a  href="{{ url_for('profile_edit') }}">Éditer votre profil</a></li>
-        </ul>
-    {% endif %}
-{% endblock %}
-
 {% block body %}
 <div class="row">
   <div class="col-md-12">
         <div class="text-center">
-            <img src="{{ url_for('static',  filename='images/pokemon/large/' + user.poke_params.img + '.gif') }}">
+            <img src="{{ url_for('static',  filename='images/pokemon/large/' + user.poke_params.img_id + '.gif') }}">
             <h2 class="d-inline-block align-bottom" style="color: {{ user.poke_params.color }};">{{ user.poke_params.pokename + " " + user.poke_params.poke_adj }}</h2>
         </div>
         <hr/>
@@ -28,11 +20,11 @@
     <div class="col-md-5">
         <h4>Dernières modifications de cet utilisateur</h4>
         <div class="list-group">
-        {% for edit in user_data.modifications %}
-            <a href="{{ url_for('page', page_name=edit.page) }}" class="list-group-item list-group-item-action flex-column align-items-start">
+        {% for edit in user.edits %}
+            <a href="{{ url_for('page', page_name=edit.page.name) }}" class="list-group-item list-group-item-action flex-column align-items-start">
                 <div class="d-flex w-100 justify-content-between">
-                    <h5 class="mb-1">{{ edit.page }}</h5>
-                    <small>Modif le {{ edit.date.strftime('%d-%m-%Y') }}</small>
+                    <h5 class="mb-1">{{ edit.page.title }}</h5>
+                    <small>Modif le {{ edit.edition_time.strftime('%d-%m-%Y') }}</small>
                 </div>
             </a>
         {% endfor %}

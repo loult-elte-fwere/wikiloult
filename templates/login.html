@@ -2,9 +2,11 @@
 
 {% block body %}
     {% if message is defined %}
-        <div class="alert alert-info"> {{ message }} </div>
+        <div class="d-flex justify-content-center">
+            <div class="text-center alert alert-info col-md-6"> {{ message }} </div>
+        </div>
     {% else %}
-        <h2> Se connecter </h2>
+        <h2 class="text-center"> Se connecter </h2>
         <form method="post" class="form-horizontal">
             <div class="form-group">
                 <label for="user" class="control-label col-sm-2">Cookie</label>
@@ -12,11 +14,11 @@
                     <input type="password" class="form-control" name="user">
                 </div>
             </div>
-            <div class="form-group">
-                <div class="col-sm-offset-2 col-sm-10">
+            <div class="form-group row">
+                <div class="col-md-offset-1 col-md-2">
                     <button type="submit" class="btn btn-default" formaction="{{ url_for('login') }}">Connectionw</button>
                 </div>
-                <div class="col-sm-offset-2 col-sm-10">
+                <div class="col-md-2">
                     <button type="submit" class="btn btn-default" formaction="{{ url_for('register') }}">Inscriptionw</button>
                 </div>
             </div>

@@ -2,68 +2,68 @@
 {% from 'macros.html' import format_user %}
 
 {% block custom_css %}
-<style>
-    @font-face {
-        font-family: 'pokefont';
-        src: url('{{ url_for('static', filename='fonts/pokemon_solid.ttf') }}');
-    }
+    <style>
+        @font-face {
+            font-family: 'pokefont';
+            src: url('{{ url_for('static', filename='fonts/pokemon_solid.ttf') }}');
+        }
 
-    #page-title {
-        font-family: pokefont;
-    }
+        #page-title {
+            font-family: pokefont;
+        }
 
-    #page-content img {
-        max-width: 110%;
-    }
-</style>
+        #page-content img {
+            max-width: 110%;
+        }
+    </style>
 
 {% endblock %}
 
 {% block title %}
-{{ page.title }}
+    {{ page.title }}
 {% endblock %}
 
 
 {% block headernav %}
-<ul class="list-inline">
-    {% if page != None %}
-        <li class="list-inline-item"><a  href="{{ url_for('page_edit', page_name=page.name ) }}">Éditer</a></li>
-        <li class="list-inline-item"><a  href="{{ url_for('page_history', page_name=page.name ) }}">Historique</a></li>
-    {% endif %}
-</ul>
+    <ul class="list-inline">
+        {% if page != None %}
+            <li class="list-inline-item"><a  href="{{ url_for('page_edit', page_name=page.name ) }}">Éditer</a></li>
+            <li class="list-inline-item"><a  href="{{ url_for('page_history', page_name=page.name ) }}">Historique</a></li>
+        {% endif %}
+    </ul>
 {% endblock %}
 
 {% block body %}
-<div class="container">
-    {% if page_data != None %}
-        <audio>
-            <source src="{{ url_for('static', filename='sound/' + page.audio_filename, version=page.last_edit.timestamp()) }}"></source>
-        </audio>
-        <h2 class="text-center" id="page-title" onmouseover="playclip();"> {{ page.title|title }} </h2>
-        <div class="row">
-            <div id="page-content" class="col-md-9">
-                {{ page.html_content | safe }}
-            </div>
-            <div class="col-md-3">
-                <div class="card">
-                    <div class="card-block" style="padding: 10px;">
-                        <h4 class="card-title">Derniers éditeurs</h4>
+    <div class="container">
+        {% if page != None %}
+            <audio>
+                <source src="{{ url_for('static', filename='sound/' + page.audio_filename, version=page.last_edit.timestamp()) }}"></source>
+            </audio>
+            <h2 class="text-center" id="page-title" onmouseover="playclip();"> {{ page.title|title }} </h2>
+            <div class="row">
+                <div id="page-content" class="col-md-9">
+                    {{ page.html_content | safe }}
+                </div>
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-block" style="padding: 10px;">
+                            <h4 class="card-title">Derniers éditeurs</h4>
+                        </div>
+                        <ul class="list-group list-group-flush">
+                            {% for edit in page.squashed_history %}
+                                <li class="list-group-item">{{ format_user(edit.editor) }}</li>
+                            {% endfor %}
+                        </ul>
                     </div>
-                    <ul class="list-group list-group-flush">
-                        {% for edit in page.history %}
-                            <li class="list-group-item">{{ format_user(edit.editor) }}</li>
-                        {% endfor %}
-                    </ul>
                 </div>
             </div>
-        </div>
-    {% else %}
-    <div class="alert alert-info">
-        Aucun contenu rédigé pour cette page à ce jour. Vous pouvez
-        <a href="{{ url_for('page_create', page_name=page.name) }}">créer cette page</a>.
+        {% else %}
+            <div class="alert alert-info">
+                Aucun contenu rédigé pour cette page à ce jour. Vous pouvez
+                <a href="{{ url_for('page_create', page_name=page_name) }}">créer cette page</a>.
+            </div>
+        {% endif %}
     </div>
-    {% endif %}
-</div>
 {% endblock %}
 
 {% block custom_js %}

@@ -1,41 +1,54 @@
 {% extends "base.html" %}
+{% from 'macros.html' import format_user %}
 
 {% block body %}
-{% if message is defined %}
-<div class="alert alert-warning">
-    {{ message }}
-</div>
-{% endif %}
-
-<div class="container">
-    <h2>Historique d'édition de l'article</h2>
-    <div class="list-group">
-        {% for edit in page_history %}
-            <div href="#" class="list-group-item list-group-item-action flex-column align-items-start"
-            data-toggle="collapse" data-target="#edit-content-{{ edit.edit_id }}">
-                <div class="d-flex w-100 justify-content-between">
-                    <h5 class="mb-1">Édition par {{ format_user(edit.editor) }},
-                        le  {{ edit.edition_time.strftime('%d-%m-%Y') }}</h5>
-                    <p> {{ edit.title }} </p>
-                </div>
-                <div class="collapse" id="edit-content-{{ edit.edit_id }}">
-                    <h3> {{ edit.title }} </h3>
-
-                    <p class="mb-1"> {{ edit.render | safe }} </p>
-                    {% if current_user.is_admin %}
-                        <a type="submit" class="btn btn-primary col-md-2"
-                        href="{{ url_for('page_restore', page_name=page_name, edit_id=edit.edit_id) }}">
-                            Rétablir cette version
-                        </a>
-                    {% endif %}
-                </div>
-
+    <div class="container">
+        <h2>Liste des utilisateurs</h2>
+        <div class="row">
+            <div class="col-md-4">
+                <a class="btn btn-warning" href="{{ url_for('users_list', action='clear_idle') }}">
+                    Supprimer les utilisateur oisifs
+                </a>
             </div>
-        {% endfor %}
+            <form action="{{ url_for("users_list", action='register') }}" method="post" class="form-inline col-md-5 offset-md-3">
+                <div class="form-group">
+                    <label for="user" class="control-label">Cookie</label>
+                    <input type="text" class="form-control" name="user">
+                </div>
+                <button type="submit" class="btn btn-primary">Inscrire</button>
+            </form>
+        </div>
+        <table class="table">
+            <thead>
+            <tr>
+                <th scope="col">Nom</th>
+                <th scope="col">Inscription</th>
+                <th scope="col">Autorisé</th>
+                <th scope="col">Nombre d'éditions</th>
+            </tr>
+            </thead>
+            <tbody>
+            {%  for user in users %}
+                <tr>
+                    <th scope="row">{{ format_user(user) }}</th>
+                    <td>{{ user.registration_date }}</td>
+                    {% if user.is_allowed %}
+                        <td>Autorisé
+                            <a class="btn btn-danger" href="{{ url_for('users_list', action='block', userid=user.short_id) }}">
+                                <i class="fa fa-remove "></i>
+                            </a>
+                        </td>
+                    {% else %}
+                        <td>En attente
+                            <a class="btn btn-primary" href="{{ url_for('users_list', action='allow', userid=user.short_id) }}">
+                                <i class="fa fa-arrow-circle-o-right"></i>
+                            </a>
+                        </td>
+                    {% endif %}
+                    <td> {{ user.edits | length }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
     </div>
-</div>
-{% endblock %}
-
-{% block custom_js %}
-    <script src="{{ url_for('static', filename='js/edition.js') }}"></script>
 {% endblock %}

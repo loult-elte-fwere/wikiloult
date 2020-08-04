@@ -8,6 +8,7 @@ config = get_config()
 app.config.from_object(config)
 set_up_db(config)
 login_manager.init_app(app)
+registration_limiter.init_app(app)
 
 @app.errorhandler(404)
 def page_not_found(e):
@@ -24,6 +25,7 @@ app.add_url_rule('/', view_func=HomeView.as_view('home'))
 app.add_url_rule('/login', view_func=LoginView.as_view('login'))
 app.add_url_rule('/logout', view_func=LogoutView.as_view('logout'))
 app.add_url_rule('/register', view_func=RegistrationView.as_view('register'))
+app.add_url_rule('/users_list', view_func=UsersListView.as_view('users_list'))
 app.add_url_rule('/user/<user_id>', view_func=UserPageView.as_view('user_page'))
 app.add_url_rule('/page/<page_name>', view_func=PageView.as_view('page'))
 app.add_url_rule('/page/<page_name>/history', view_func=PageHistoryView.as_view('page_history'))
@@ -35,6 +37,8 @@ app.add_url_rule('/random', view_func=RandomPageView.as_view('random_page'))
 app.add_url_rule('/last_edits', view_func=LastEditsView.as_view('last_edits'))
 app.add_url_rule('/all', view_func=AllPagesView.as_view('all_pages'))
 app.add_url_rule('/rules', view_func=RulesView.as_view('rules'))
+
+app.add_url_rule('/api/last_edits/', view_func=LastEditsAPIEndpoint.as_view('api_edits_api'))
 
 if __name__ == "__main__":
     app.config['DEBUG'] = True

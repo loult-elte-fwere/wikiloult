@@ -63,12 +63,10 @@ def get_config(flask_config=None):
     config_cls = config_mapping.get(flask_config, ProductionConfig)
 
     # if the config is for regular production, overloading default attributes
-    # based on the env variables or the .env file variables
+    # based on the fields of the yml config
     if config_dict is not None:
-        attributes = [att for att in dir(config_cls) if not att.startswith("__")]
-        for attr in attributes:
-            if attr in config_dict:
-                setattr(config_cls, attr, config_dict[attr])
+        for attr in config_dict:
+            setattr(config_cls, attr, config_dict[attr])
 
     return config_cls
 
