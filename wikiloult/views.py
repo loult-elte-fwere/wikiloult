@@ -270,8 +270,8 @@ class LastEditsAPIEndpoint(BaseMethodView):
 
     def get(self):
         last_edits = HistoryEntry.get_last_edited_pages()
-        if len(last_edits) > 5:
-            last_edits = last_edits[:5]
+        if len(last_edits) > 3:
+            last_edits = last_edits[:3]
         history = [
             {
                 "title": page.title,
