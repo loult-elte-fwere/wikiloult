@@ -151,31 +151,26 @@ class PageEditView(BaseMethodView):
         return render_template("page_edit.html", page=page)
 
     def post(self, page_name: str):
-        title = request.form["title"]
-        markdown_content = request.form["content"]
+        page: WikiPage = WikiPage.objects.get(name=page_name)
+        page.title = request.form["title"]
+        page.markdown_content = request.form["content"]
 
         # if the user asked only for a preview, don't save and just render the page
         if request.form.get("preview", None) is not None:
             markdown_renderer = WikiPageRenderer()
-            html_render = markdown_renderer.render(escape(markdown_content))
-            return render_template("page_edit.html",
-                                   page_name=page_name,
-                                   page_content=markdown_content,
-                                   page_title=title,
-                                   preview=html_render)
+            page.html_content = markdown_renderer.render(escape(page.markdown_content, quote=False))
+            return render_template("page_edit.html", page=page, preview=True)
 
         # same if there's something missing
-        if not title.strip() or not markdown_content.strip():
+        if not page.title.strip() or not page.markdown_content.strip():
             return render_template("page_edit.html",
-                                   page_name=page_name,
-                                   page_content=markdown_content,
-                                   page_title=title,
-                                   message="Le titre ni le contenu ne doivent être vides.")
+                                   page=page,
+                                   preview=True,
+                                   message="Ni le titre ni le contenu ne peuvent être vides.")
 
         # else, we just save
-        page: WikiPage = WikiPage.objects.get(name=page_name)
-        edit = page.edit(markdown_content, title, current_user)
-        audio_render(title, Path(current_app.config["AUDIO_RENDER_FOLDER"]) / Path(page_name + ".wav"))
+        edit = page.edit(page.markdown_content, page.title, current_user._get_current_object())
+        audio_render(page.title, Path(current_app.config["AUDIO_RENDER_FOLDER"]) / Path(page_name + ".wav"))
         current_user.edits.append(edit)
         current_user.save()
         return redirect(url_for("page", page_name=page_name))
@@ -191,10 +186,10 @@ class PageRestoreView(BaseMethodView):
 
         edit_id = request.args.get('edit_id')
         history_entry: HistoryEntry = HistoryEntry.objects.get(id=edit_id)
-        return render_template("page_edit.html",
-                               page_name=history_entry.page.name,
-                               page_content=history_entry.markdown,
-                               page_title=history_entry.title)
+        page = history_entry.page
+        page.title = history_entry.title
+        page.markdown_content = history_entry.markdown
+        return render_template("page_edit.html", page=page)
 
 
 class PageCreateView(BaseMethodView):
@@ -211,7 +206,7 @@ class PageCreateView(BaseMethodView):
 
         if request.form.get("preview", None) is not None:
             markdown_renderer = WikiPageRenderer()
-            html_render = markdown_renderer.render(escape(markdown_content))
+            html_render = markdown_renderer.render(escape(markdown_content, quote=False))
             return render_template("page_create.html",
                                    page_content=markdown_content,
                                    page_title=title,

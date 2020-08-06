@@ -126,7 +126,7 @@ class WikiPage(Document):
 
     def edit(self, markdown_content: str, page_title: str, editor: User):
         markdown_renderer = WikiPageRenderer()
-        new_render = markdown_renderer.render(escape(markdown_content))
+        new_render = markdown_renderer.render(escape(markdown_content, quote=False))
         history_entry = HistoryEntry(editor=editor,
                                      page=self,
                                      markdown=markdown_content,

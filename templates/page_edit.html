@@ -9,15 +9,15 @@
 
     <div class="container">
         <h2>Edition de l'article</h2>
-        <form method="post" action="{{ url_for('page_edit', page_name=page_name) }}">
+        <form method="post" action="{{ url_for('page_edit', page_name=page.name) }}">
             <div class="form-group">
                 <label for="title" class="control-label">Titre</label>
                 <input type="text" class="form-control" id="title" name="title"
-                       value="{{ page_title if page_title is defined }}">
+                       value="{{ page.title }}">
             </div>
             <div class="form-group">
                 <label for="content" class="control-label">Contenu</label>
-                <textarea class="form-control" rows="30" id="content" name="content">{{ page_content if page_content != None }}</textarea>
+                <textarea class="form-control" rows="30" id="content" name="content">{{ page.markdown_content }}</textarea>
             </div>
             <button type="submit" class="btn btn-primary">Valider</button>
             <button type="submit" class="btn btn-primary" name="preview">Aperçu</button>
@@ -31,11 +31,11 @@
                     {% include 'markdown.html' %}
                 </div>
             </div>
-            {% if preview is defined %}
+            {% if preview is defined and preview %}
                 <hr/>
                 <h3>Aperçu de l'article</h3>
                 <div id="preview">
-                    {{ preview | safe }}
+                    {{ page.html_content | safe }}
                 </div>
             {% endif %}
     </div>
