@@ -155,6 +155,10 @@ class PageEditView(BaseMethodView):
         page.title = request.form["title"]
         page.markdown_content = request.form["content"]
 
+        editor: User = current_user._get_current_object()
+        if not editor.is_allowed:
+            return abort(401)
+
         # if the user asked only for a preview, don't save and just render the page
         if request.form.get("preview", None) is not None:
             markdown_renderer = WikiPageRenderer()
