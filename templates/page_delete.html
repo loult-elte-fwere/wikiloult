@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block body %}
+    {% if message is defined %}
+        <div class="d-flex justify-content-center">
+            <div class="text-center alert alert-info col-md-6"> {{ message }} </div>
+        </div>
+    {% else %}
+        <h3 class="text-center"> Es-tu bien sûr de vouloir supprimer la page "{{ page.title }}"?</h3>
+
+        <div class="form-group row">
+            <div class="offset-4 col-md-2">
+                <a type="submit" class="btn btn-warning" href="{{ url_for('page_delete', page_name=page.name, confirm=True) }}">Bouee!</a>
+            </div>
+            <div class="col-md-2">
+                <a type="submit" class="btn btn-secondary" href="{{ url_for('page', page_name=page.name) }}">Nonnww!</a>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}

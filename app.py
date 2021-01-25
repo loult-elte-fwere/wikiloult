@@ -34,6 +34,7 @@ app.add_url_rule('/page/<page_name>/history', view_func=PageHistoryView.as_view(
 app.add_url_rule('/page/<page_name>/edit', view_func=PageEditView.as_view('page_edit'))
 app.add_url_rule('/page/create', view_func=PageCreateView.as_view('page_create'))
 app.add_url_rule('/page/restore', view_func=PageRestoreView.as_view('page_restore'))
+app.add_url_rule('/page/delete', view_func=PageDeleteView.as_view('page_delete'))
 app.add_url_rule('/page/search', view_func=SearchPageView.as_view('search_page'))
 app.add_url_rule('/random', view_func=RandomPageView.as_view('random_page'))
 app.add_url_rule('/last_edits', view_func=LastEditsView.as_view('last_edits'))

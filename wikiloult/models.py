@@ -8,7 +8,7 @@ from typing import List
 from cookie_factory import PokeParameters, PokeProfile, hash_cookie
 from flask import current_app
 from flask_login import UserMixin
-from mongoengine import Document, StringField, BooleanField, ReferenceField, DateTimeField, ListField
+from mongoengine import Document, StringField, BooleanField, ReferenceField, DateTimeField, ListField, CASCADE, PULL
 
 from .rendering import WikiPageRenderer
 
@@ -165,3 +165,6 @@ class WikiPage(Document):
     def get_random_page(cls):
         result = cls.objects().aggregate([{"$sample": {"size": 1}}])
         return next(result)
+
+WikiPage.register_delete_rule(HistoryEntry, 'page', CASCADE)
+HistoryEntry.register_delete_rule(User, 'edits', PULL)

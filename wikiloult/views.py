@@ -70,12 +70,13 @@ class LoginView(BaseMethodView):
         user_cookie = request.form["user"]
         try:
             user = User.objects.get(cookie=user_cookie)
+            login_user(user)
         except DoesNotExist:
-            return redirect(url_for('register'))
+            message = "Le cookie ne correspond à aucun utilisateur inexistant. " \
+                      "J'accepte pas les salopes qui se la jouent random."
         else:
             message = "Connectèw."
 
-        login_user(user)
         return render_template("login.html", message=message)
 
 
@@ -194,6 +195,25 @@ class PageRestoreView(BaseMethodView):
         page.title = history_entry.title
         page.markdown_content = history_entry.markdown
         return render_template("page_edit.html", page=page)
+
+
+class PageDeleteView(BaseMethodView):
+    """Restore a page to a previous edit ID"""
+    decorators = [login_required]
+
+    def get(self):
+        if not current_user.is_admin:
+            abort(403)
+
+        page_name = request.args.get('page_name')
+        page: WikiPage = WikiPage.objects.get(name=page_name)
+        confirm = request.args.get("confirm", default=False)
+        if confirm:
+            page_title = page.title
+            page.delete()
+            return render_template("page_delete.html", message=f"Page {page_title} bien supprimèw !")
+        else:
+            return render_template("page_delete.html", page=page)
 
 
 class PageCreateView(BaseMethodView):
