@@ -173,7 +173,7 @@ class PageEditView(BaseMethodView):
                                    message="Ni le titre ni le contenu ne peuvent être vides.")
 
         # else, we just save
-        edit = page.edit(page.markdown_content, page.title, current_user._get_current_object())
+        edit = page.edit(page.markdown_content, page.title, editor)
         audio_render(page.title, Path(current_app.config["AUDIO_RENDER_FOLDER"]) / Path(page_name + ".wav"))
         current_user.edits.append(edit)
         current_user.save()
@@ -204,6 +204,10 @@ class PageCreateView(BaseMethodView):
                                page_name=request.args.get("page_name", None))
 
     def post(self):
+        editor: User = current_user._get_current_object()
+        if not editor.is_allowed:
+            return abort(401)
+
         page_name = request.form["name"]
         title = request.form["title"]
         markdown_content = request.form["content"]
@@ -232,8 +236,7 @@ class PageCreateView(BaseMethodView):
                                    page_name=page_name,
                                    message=error_message)
 
-        WikiPage.create_page(page_name.lower(), title, markdown_content,
-                             current_user._get_current_object())
+        WikiPage.create_page(page_name.lower(), title, markdown_content, editor)
         current_app.config["AUDIO_RENDER_FOLDER"].mkdir(exist_ok=True, parents=True)
         new_wav_path = current_app.config["AUDIO_RENDER_FOLDER"] / Path(page_name + ".wav")
         audio_render(title, str(new_wav_path))
